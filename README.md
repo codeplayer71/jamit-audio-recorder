@@ -1,9 +1,9 @@
 # jamit-audio-recorder
 
 ## Demo
-```
-[Demo Audio-Recorder](https://www.jamit.ba/vue/jamit-audio-recorder/)
-```
+
+[Vue Audio-Recorder](https://www.jamit.ba/vue/jamit-audio-recorder/)
+
 
 
 ## Project setup
