@@ -61,9 +61,9 @@ export default {
       permissionStatus: null,
       recorder: null,
       audioIsPlaying: false,
+      audioFile: null,
       audioType: 'audio/x-wav',
       audioFileName: 'audio.wav',
-      audioFile: null,
       uploadedAudioFile: null,
       recordAudioState: false,
       initialTime: Date.now(),
@@ -150,6 +150,11 @@ export default {
         this.audioFile = null;
         this.uploadedAudioFile = null;
       }
+    },
+  },
+  watch: {
+    uploadedAudioFile(value) {
+      this.$emit('audioFile', value);
     },
   },
 };

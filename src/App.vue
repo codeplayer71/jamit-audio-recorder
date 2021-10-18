@@ -1,5 +1,7 @@
 <template>
-  <AudioRecorder :timer="true" />
+ <div>
+  <AudioRecorder :timer="true" @audioFile="myAudioFile" />
+ </div>
 </template>
 
 <script>
@@ -9,6 +11,12 @@ export default {
   name: 'App',
   components: {
     AudioRecorder,
+  },
+  methods: {
+    myAudioFile(audioFile) {
+      // eslint-disable-next-line no-console
+      console.log('myAudioFile: ', audioFile);
+    },
   },
 };
 </script>
