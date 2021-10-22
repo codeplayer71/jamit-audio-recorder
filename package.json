@@ -1,10 +1,13 @@
 {
   "name": "jamit-audio-recorder",
-  "version": "0.1.0",
-  "repository": { "type": "git", "url": "https://github.com/codeplayer71/jamit-audio-recorder.git" },
+  "version": "0.1.4",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder.git"
+  },
   "private": false,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 8080",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -21,7 +24,8 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-vue": "^7.0.0"
+    "eslint-plugin-vue": "^7.0.0",
+    "prettier": "2.4.1"
   },
   "eslintConfig": {
     "root": true,

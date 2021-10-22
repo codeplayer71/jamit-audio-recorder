@@ -4,9 +4,9 @@
       <div
         v-if="!recordAudioState"
         title="Start recording"
-        @click="permissionStatus !== 'denied' ? recordAudio() : false"
+        @click="permissionStatus === 'denied' || audioIsPlaying === false ? recordAudio() : false"
         class="ar-icon"
-        :class="permissionStatus === 'denied' ? 'recorder-start-error' : 'recorder-start pointer'"
+        :class="permissionStatus === 'denied' || audioIsPlaying ? 'recorder-start-error' : 'recorder-start pointer'"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
