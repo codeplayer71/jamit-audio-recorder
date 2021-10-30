@@ -2,11 +2,19 @@
   <div class="audioControls">
     <div>
       <div
-        v-if="!recordAudioState"
+        v-if="!Audio.recordAudioState"
         title="Start recording"
-        @click="permissionStatus === 'denied' || audioIsPlaying === false ? recordAudio() : false"
+        @click="
+          Audio.permissionStatus === 'denied' || Audio.audioIsPlaying === false
+            ? recordAudio()
+            : false
+        "
         class="ar-icon"
-        :class="permissionStatus === 'denied' || audioIsPlaying ? 'recorder-start-error' : 'recorder-start pointer'"
+        :class="
+          Audio.permissionStatus === 'denied' || Audio.audioIsPlaying
+            ? 'recorder-start-error'
+            : 'recorder-start pointer'
+        "
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
@@ -17,7 +25,7 @@
         </svg>
       </div>
       <div
-        v-if="recordAudioState"
+        v-if="Audio.recordAudioState"
         title="Stop recording"
         @click="stopRecordAudio"
         class="ar-icon recorder-stop pointer"
@@ -28,36 +36,46 @@
         </svg>
       </div>
     </div>
-    <div v-show="audioFile && !recordAudioState" ref="audio" class="audio">
+    <div v-show="Audio.audioFile && !Audio.recordAudioState" ref="audio" class="audio">
       <audio controls="controls"></audio>
     </div>
-    <div v-show="recordAudioState && timer">
+    <div v-show="Audio.recordAudioState && showTimer">
       <span class="audioTimer" ref="audioTimer"></span>
     </div>
-    <div v-show="audioFile && !recordAudioState">
+    <div v-show="Audio.audioFile && !Audio.recordAudioState">
       <button
         title="Delete Audio"
-        :disabled="audioIsPlaying"
+        :disabled="Audio.audioIsPlaying"
         @click="deleteAudioFile"
-        class="deleteAudio pointer">X</button>
+        class="deleteAudio pointer"
+      >
+        X
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+import {
+  watch, reactive, ref, toRefs, onMounted,
+} from 'vue';
+
 export default {
   name: 'AudioRecorder',
+  emits: ['audioFile'],
   props: {
     timer: {
       type: Boolean,
       default: true,
     },
   },
-  mounted() {
-    this.checkPermission();
-  },
-  data() {
-    return {
+  setup(props, { emit }) {
+    const { timer } = toRefs(props);
+
+    const audioTimer = ref('');
+    const audio = ref('');
+
+    const Audio = reactive({
       permissionStatus: null,
       recorder: null,
       audioIsPlaying: false,
@@ -67,101 +85,109 @@ export default {
       uploadedAudioFile: null,
       recordAudioState: false,
       initialTime: Date.now(),
+    });
+
+    const checkPermission = async () => {
+      const status = await navigator.permissions.query({ name: 'microphone' });
+      Audio.permissionStatus = status.state;
     };
-  },
-  methods: {
-    async checkPermission() {
-      const status = await navigator.permissions.query(
-        { name: 'microphone' },
-      );
-      this.permissionStatus = status.state;
-    },
-    clearAudio() {
-      const TIMER = this.$refs.audioTimer;
-      this.initialTime = Date.now();
+    const clearAudio = () => {
+      const TIMER = audioTimer.value;
+      Audio.initialTime = Date.now();
       TIMER.innerText = '';
-    },
-    checkAudioTime() {
-      const TIMER = this.$refs.audioTimer;
-      const timeDifference = Date.now() - this.initialTime;
-      const formatted = this.convertAudioTime(timeDifference);
-      TIMER.innerHTML = `${formatted}`;
-    },
-    convertAudioTime(miliseconds) {
+    };
+    const convertAudioTime = (miliseconds) => {
       const totalSeconds = Math.floor(miliseconds / 1000);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds - minutes * 60;
       const sec = seconds < 10 ? `0${seconds}` : seconds;
       return `${minutes}:${sec}`;
-    },
-    recordAudio() {
-      this.clearAudio();
+    };
+    const checkAudioTime = () => {
+      const TIMER = audioTimer.value;
+      const timeDifference = Date.now() - Audio.initialTime;
+      const formatted = convertAudioTime(timeDifference);
+      TIMER.innerHTML = `${formatted}`;
+    };
+    const recordAudio = () => {
+      clearAudio();
       try {
         const device = navigator.mediaDevices.getUserMedia({ audio: true });
         const items = [];
-        device.then((stream) => {
-          this.recorder = new MediaRecorder(stream);
-          this.recorder.ondataavailable = (e) => {
-            items.push(e.data);
-            if (this.recorder.state === 'inactive') {
-              const blob = new Blob(items, { type: this.audioType });
-              this.audioFile = URL.createObjectURL(blob);
-              this.uploadedAudioFile = blob;
-              const { audio } = this.$refs;
-              audio.innerHTML = '';
-              const mainaudio = document.createElement('audio');
-              mainaudio.setAttribute('controls', 'controls');
-              audio.appendChild(mainaudio);
-              mainaudio.innerHTML = `<source src="${this.audioFile}" type="${this.audioType}" />`;
-              mainaudio.onplay = () => {
-                this.audioIsPlaying = true;
-              };
-              mainaudio.onpause = () => {
-                this.audioIsPlaying = false;
-              };
-              mainaudio.onended = () => {
-                this.audioIsPlaying = false;
-              };
-            }
-          };
-          this.recordAudioState = true;
-          this.audioInterval = setInterval(this.checkAudioTime, 500);
-          this.recorder.start();
-        }).catch((err) => {
-          // eslint-disable-next-line no-alert
-          alert(err);
-          // eslint-disable-next-line no-console
-          console.log(err);
-        });
+        device
+          .then((stream) => {
+            Audio.recorder = new MediaRecorder(stream);
+            Audio.recorder.ondataavailable = (e) => {
+              items.push(e.data);
+              if (Audio.recorder.state === 'inactive') {
+                const blob = new Blob(items, { type: Audio.audioType });
+                Audio.audioFile = URL.createObjectURL(blob);
+                Audio.uploadedAudioFile = blob;
+                audio.value.innerHTML = '';
+                const mainaudio = document.createElement('audio');
+                mainaudio.setAttribute('controls', 'controls');
+                audio.value.appendChild(mainaudio);
+                mainaudio.innerHTML = `<source src="${Audio.audioFile}" type="${Audio.audioType}" />`;
+                mainaudio.onplay = () => {
+                  Audio.audioIsPlaying = true;
+                };
+                mainaudio.onpause = () => {
+                  Audio.audioIsPlaying = false;
+                };
+                mainaudio.onended = () => {
+                  Audio.audioIsPlaying = false;
+                };
+              }
+            };
+            Audio.recordAudioState = true;
+            Audio.audioInterval = setInterval(checkAudioTime, 500);
+            Audio.recorder.start();
+          })
+          .catch((err) => {
+            // eslint-disable-next-line no-alert
+            alert(err);
+            // eslint-disable-next-line no-console
+            console.log(err);
+          });
       } catch (err) {
         // eslint-disable-next-line no-alert
         alert(`Audio error:  ${err}`);
         // eslint-disable-next-line no-console
         console.error('Audio error: ', err);
       }
-    },
-    stopRecordAudio() {
-      clearInterval(this.audioInterval);
-      this.recorder.stop();
-      this.recordAudioState = false;
-    },
-    deleteAudioFile() {
-      if (this.recordAudioState === false) {
-        this.audioFile = null;
-        this.uploadedAudioFile = null;
+    };
+    const stopRecordAudio = () => {
+      clearInterval(Audio.audioInterval);
+      Audio.recorder.stop();
+      Audio.recordAudioState = false;
+    };
+    const deleteAudioFile = () => {
+      if (Audio.recordAudioState === false) {
+        Audio.audioFile = null;
+        Audio.uploadedAudioFile = null;
       }
-    },
-  },
-  watch: {
-    uploadedAudioFile(value) {
-      this.$emit('audioFile', value);
-    },
+    };
+
+    onMounted(checkPermission);
+
+    watch(() => Audio.uploadedAudioFile, (value) => {
+      emit('audioFile', value);
+    });
+
+    return {
+      Audio,
+      audioTimer,
+      showTimer: timer,
+      audio,
+      recordAudio,
+      stopRecordAudio,
+      deleteAudioFile,
+    };
   },
 };
 </script>
 
 <style scoped>
-
 .audioControls {
   display: flex;
   align-items: center;
