@@ -1,7 +1,14 @@
 <template>
- <div>
-  <AudioRecorder :timer="true" @audioFile="myAudioFile" />
- </div>
+  <div>
+    <AudioRecorder
+      :timer="true"
+      timer-color="#333"
+      :timer-font-size="1.2"
+      timer-background="#eee"
+      :audio-width="200"
+      @audioFile="myAudioFile"
+    />
+  </div>
 </template>
 
 <script>

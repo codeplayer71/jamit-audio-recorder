@@ -1,5 +1,5 @@
 <template>
-  <div class="audioControls">
+  <div class="audioControls" :style="cssProps">
     <div>
       <div
         v-if="!recordAudioState"
@@ -28,8 +28,8 @@
         </svg>
       </div>
     </div>
-    <div v-show="audioFile && !recordAudioState" ref="audio" class="audio">
-      <audio controls="controls"></audio>
+    <div v-show="audioFile && !recordAudioState" ref="audio" class="audio audioStyle">
+      <audio controls="controls" class="audioStyle"></audio>
     </div>
     <div v-show="recordAudioState && timer">
       <span class="audioTimer" ref="audioTimer"></span>
@@ -51,6 +51,22 @@ export default {
     timer: {
       type: Boolean,
       default: true,
+    },
+    timerColor: {
+      type: String,
+      default: '#000',
+    },
+    timerFontSize: {
+      type: Number,
+      default: 1,
+    },
+    timerBackground: {
+      type: String,
+      default: '#ccc',
+    },
+    audioWidth: {
+      type: Number,
+      default: 200,
     },
   },
   mounted() {
@@ -111,6 +127,7 @@ export default {
               audio.innerHTML = '';
               const mainaudio = document.createElement('audio');
               mainaudio.setAttribute('controls', 'controls');
+              mainaudio.setAttribute('style', `width: ${this.audioWidth}px`);
               audio.appendChild(mainaudio);
               mainaudio.innerHTML = `<source src="${this.audioFile}" type="${this.audioType}" />`;
               mainaudio.onplay = () => {
@@ -152,6 +169,16 @@ export default {
       }
     },
   },
+  computed: {
+    cssProps() {
+      return {
+        '--font-size': `${this.timerFontSize}em`,
+        '--font-color': this.timerColor,
+        '--timer-background': this.timerBackground,
+        '--audio-width': `${this.audioWidth}px`,
+      };
+    },
+  },
   watch: {
     uploadedAudioFile(value) {
       this.$emit('audioFile', value);
@@ -167,10 +194,13 @@ export default {
   align-items: center;
 }
 
+.audioStyle {
+  width: var(--audio-width);
+}
+
 .ar-icon {
   width: 40px;
   height: 40px;
-  line-height: 45px;
   border-radius: 50%;
   padding: 5px;
 }
@@ -216,11 +246,11 @@ audio {
 }
 
 .audioTimer {
-  background: #f1f3f4;
+  background: var(--timer-background);
   padding: 5px 20px;
-  color: #202020;
+  color: var(--font-color);
   border-radius: 5%;
-  font-size: 1rem;
+  font-size: var(--font-size);
   font-weight: bold;
   margin: 0 0 0 5px;
 }
