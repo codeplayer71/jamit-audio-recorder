@@ -1,16 +1,34 @@
 {
   "name": "jamit-audio-recorder",
-  "version": "0.1.5",
+  "version": "0.1.6",
+  "author": {
+    "name": "Jasminko Milicevic",
+    "email": "codeplayer71@gmail.com"
+  },
+  "description": "Nice little Vue Audio Recorder",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/codeplayer71/jamit-audio-recorder.git"
   },
+  "keywords": [
+    "audio",
+    "recorder",
+    "record",
+    "vue",
+    "vue3"
+  ],
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve --port 8080",
     "build": "vue-cli-service build",
+    "build-library": "vue-cli-service build --target lib --name jamit-audio-recorder ./src/components/AudioRecorder.vue",
     "lint": "vue-cli-service lint"
   },
+  "main": "./dist/jamit-audio-recorder.common.js",
+  "files": [
+    "dist/*"
+  ],
   "dependencies": {
     "core-js": "^3.19.0",
     "vue": "^3.2.20"

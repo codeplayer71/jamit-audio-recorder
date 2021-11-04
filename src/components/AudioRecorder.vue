@@ -6,7 +6,11 @@
         title="Start recording"
         @click="permissionStatus === 'denied' || audioIsPlaying === false ? recordAudio() : false"
         class="ar-icon"
-        :class="permissionStatus === 'denied' || audioIsPlaying ? 'recorder-start-error' : 'recorder-start pointer'"
+        :class="
+          permissionStatus === 'denied' || audioIsPlaying
+            ? 'recorder-start-error'
+            : 'recorder-start pointer'
+        "
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
@@ -39,7 +43,10 @@
         title="Delete Audio"
         :disabled="audioIsPlaying"
         @click="deleteAudioFile"
-        class="deleteAudio pointer">X</button>
+        class="deleteAudio pointer"
+      >
+        X
+      </button>
     </div>
   </div>
 </template>
@@ -188,7 +195,6 @@ export default {
 </script>
 
 <style scoped>
-
 .audioControls {
   display: flex;
   align-items: center;
