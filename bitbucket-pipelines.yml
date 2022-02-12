@@ -1,0 +1,14 @@
+image: samueldebruyn/debian-git
+
+pipelines:
+  default:
+      - step:
+          script: #TEST
+            - apt-get update
+            - apt-get -qq install git-ftp
+            - git ftp init --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
+      - step:
+          name: Deploy to test
+          deployment: test
+          script:
+          - echo "Deploying to test environment"
