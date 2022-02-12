@@ -17,4 +17,4 @@ pipelines:
           - npm run build
           - cd dist
           - ls -la
-          - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
+          - git ftp init --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
