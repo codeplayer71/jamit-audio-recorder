@@ -5,9 +5,8 @@ pipelines:
       - step:
           script: #TEST
             - apt-get update
+            - apt-get upgrade -y
             - apt-get -qq install git-ftp
-            - apt-get install curl software-properties-common
-            - curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
             - apt-get install nodejs -y
             - node -v
             - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
