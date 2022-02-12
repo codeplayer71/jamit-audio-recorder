@@ -3,12 +3,14 @@ image: atlassian/default-image:latest
 pipelines:
   default:
       - step:
+          name: Deploy to test
+          deployment: test
+          script:
+          - npm install
+          - npm run build
+      - step:
           script: #TEST
             - apt-get update
             - apt-get -qq install git-ftp
             - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
-      - step:
-          name: Deploy to test
-          deployment: test
-          script:
-          - npm run build
+     
