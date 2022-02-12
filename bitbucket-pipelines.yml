@@ -1,4 +1,4 @@
-image: ubuntu-latest
+image: atlassian/default-image:latest
 
 pipelines:
   default:
