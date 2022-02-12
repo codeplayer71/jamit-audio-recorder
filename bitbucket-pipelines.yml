@@ -1,4 +1,4 @@
-image: samueldebruyn/debian-git
+image: ubuntu-latest
 
 pipelines:
   default:
