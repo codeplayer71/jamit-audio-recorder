@@ -1,11 +1,10 @@
-image: atlassian/default-image:3
+image: wagnerstephan/bitbucket-git-ftp:latest
 
 pipelines:
   default:
       - step:
           script: #TEST
             - apt-get update
-            - apt-get upgrade -y
             - apt-get install nodejs -y
             - node -v
       - step:
@@ -16,5 +15,5 @@ pipelines:
           - npm run build
           - cd dist
           - ls -la
-          - apt-get -qq install git-ftp
+          - git reset --hard
           - git ftp init --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
