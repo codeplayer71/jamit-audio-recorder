@@ -10,10 +10,6 @@ pipelines:
           script:
             - npm install
             - npm run build
-          artifacts:
-            - dist/*
-            - dist/**/*
-            - dist/**/**
       - step:
         name: Deploy
         image: atlassian/default-image:latest
