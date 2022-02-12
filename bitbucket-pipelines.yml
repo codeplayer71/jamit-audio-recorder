@@ -12,6 +12,7 @@ pipelines:
             - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
       - step:
           name: Deploy to test
+          image: node:17.5.0
           deployment: test
           script:
           - npm i npm@latest -g
