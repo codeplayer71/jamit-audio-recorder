@@ -9,10 +9,12 @@ pipelines:
             - apt-get -qq install git-ftp
             - apt-get install nodejs -y
             - node -v
-            - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
       - step:
           name: Deploy to test
           deployment: test
           script:
           - npm install --force
           - npm run build
+          - cd dist
+          - ls -la
+          - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
