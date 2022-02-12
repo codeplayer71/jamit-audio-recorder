@@ -1,4 +1,4 @@
-image: atlassian/default-image:latest
+image: node:8.12.0
 
 pipelines:
   branches:
@@ -15,6 +15,9 @@ pipelines:
             - dist/**/*
             - dist/**/**
       - step:
+        name: Deploy
+        image: atlassian/default-image:latest
           script: #TEST
             - apt-get update
+            - apt-get -qq install git-fp
             - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
