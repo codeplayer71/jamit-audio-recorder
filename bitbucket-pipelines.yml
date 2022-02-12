@@ -1,4 +1,4 @@
-image: wagnerstephan/bitbucket-git-ftp:latest
+image: atlassian/default-image:3
 
 pipelines:
   default:
@@ -16,4 +16,6 @@ pipelines:
           - cd dist
           - ls -la
           - git reset --hard
+          - apt-get install git -y
+          - apt-get install git-ftp -y
           - git ftp init --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
