@@ -1,19 +1,16 @@
-image: node:8.12.0
+image: atlassian/default-image:latest
 
 pipelines:
-  branches:
-    master:
+  default:
       - step:
-          name: Generate Static Files
-          caches:
-            - node
-          script:
-            - npm install
-            - npm run build
-      - step:
-        name: Deploy
-        image: atlassian/default-image:latest
           script: #TEST
             - apt-get update
-            - apt-get -qq install git-fp
+            - apt-get upgrade -y
+            - apt-get -qq install git-ftp
             - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
+      - step:
+          name: Deploy to test
+          deployment: test
+          script:
+          - npm install
+          - npm run build
