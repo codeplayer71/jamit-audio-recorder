@@ -4,9 +4,14 @@ pipelines:
   default:
       - step:
           script: #TEST
+            - node -v
             - apt-get update
             - apt-get upgrade -y
             - apt-get -qq install git-ftp
+            - apt-get install curl software-properties-common
+            - curl -sL https://deb.nodesource.com/setup_16.x | sudo bash -
+            - apt-get install nodejs 
+            - node -v
             - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
       - step:
           name: Deploy to test
