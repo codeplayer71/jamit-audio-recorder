@@ -15,6 +15,6 @@ pipelines:
           image: node:17.5.0
           deployment: test
           script:
-          - npm i npm@latest -g
-          - npm install
-          - npm run build
+          - npm install --global yarn
+          - yarn install
+          - yarn run build
