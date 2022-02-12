@@ -6,7 +6,6 @@ pipelines:
           script: #TEST
             - apt-get update
             - apt-get upgrade -y
-            - apt-get -qq install git-ftp
             - apt-get install nodejs -y
             - node -v
       - step:
@@ -17,4 +16,5 @@ pipelines:
           - npm run build
           - cd dist
           - ls -la
+          - apt-get -qq install git-ftp
           - git ftp init --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
