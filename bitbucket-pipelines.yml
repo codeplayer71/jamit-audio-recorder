@@ -5,7 +5,7 @@ pipelines:
       - step:
           script: #TEST
             - apt-get update
-            - apt-get upgrade -y
+            #- apt-get upgrade -y
             - apt-get install nodejs -y
             - node -v
       - step:
@@ -20,6 +20,6 @@ pipelines:
               PASSWORD: $FTP_PASSWORD
               SERVER: 157.90.136.203
               REMOTE_PATH: /web/test/
-              LOCAL_PATH: /dist/
+              LOCAL_PATH: dist
 
  
