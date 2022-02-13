@@ -2,19 +2,22 @@ image: atlassian/default-image:3
 
 pipelines:
   default:
-      - step:
-          script: #TEST
-            - apt-get update
-            - apt-get -qq install git-ftp
-            - apt-get install curl software-properties-common
-            - apt-get install nodejs -y
-            - node -v
-            - git ftp push --user $FTP_USER --passwd $FTP_PASSWORD ftp://157.90.136.203/web/test/
-      - step:
-          name: Deploy to test
-          image: node:17.5.0
-          deployment: test
-          script:
-          - npm i npm@latest -g
-          - npm install
+    - step:
+        script: #TEST
+          - apt-get update
+          #- apt-get upgrade -y
+          - apt-get install nodejs -y
+          - node -v
+    - step:
+        name: Deploy Jamit-Audio-Recorder
+        deployment: test
+        script:
+          - npm install --force
           - npm run build
+          - pipe: atlassian/ftp-deploy:0.3.7
+            variables:
+              USER: $FTP_USER
+              PASSWORD: $FTP_PASSWORD
+              SERVER: 157.90.136.203
+              REMOTE_PATH: /web/test/
+              LOCAL_PATH: dist/
