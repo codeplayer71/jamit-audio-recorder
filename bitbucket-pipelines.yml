@@ -14,12 +14,12 @@ pipelines:
           script:
           - npm install --force
           - npm run build
-      - pipe: atlassian/ftp-deploy:0.3.7
-          variables:
-            USER: $FTP_USER
-            PASSWORD: $FTP_PASSWORD
-            SERVER: 157.90.136.203
-            REMOTE_PATH: /web/test/
-            LOCAL_PATH: /dist/
-    
+          - pipe: atlassian/ftp-deploy:0.3.7
+            variables:
+              USER: $FTP_USER
+              PASSWORD: $FTP_PASSWORD
+              SERVER: 157.90.136.203
+              REMOTE_PATH: /web/test/
+              LOCAL_PATH: /dist/
+
  
