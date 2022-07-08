@@ -2,7 +2,7 @@
 Nice little Audio Recorder for Vue
 
 ## Demo
-[Vue Audio-Recorder](https://www.jamit.ba/vue/jamit-audio-recorder/)
+[Vue Audio-Recorder](https://www.jamit.one/vue/jamit-audio-recorder/)
 
 ##Install
 ```
