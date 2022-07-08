@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  
+
 jobs:
   build:
     name: Build jamit-audio-recorder
@@ -35,13 +35,13 @@ jobs:
       - name: Sync files to hosting
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
-          server: 157.90.136.203
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /web/test/
-    
-  
-        
-      
-      
-    
+          server-dir: /web/vue/jamit-audio-recorder/
+
+
+
+
+
+
