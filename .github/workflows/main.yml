@@ -33,7 +33,7 @@ jobs:
           name: dist
           path: dist
       - name: Sync files to hosting
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        uses: Sgit pushamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER }}
