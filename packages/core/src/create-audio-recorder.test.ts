@@ -520,4 +520,289 @@ describe('createAudioRecorder', () => {
             error: null,
         });
     });
+    it('measures recording duration without counting paused time', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-08-02T12:00:00Z'));
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            start(): void {}
+
+            pause(): void {}
+
+            resume(): void {}
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            vi.advanceTimersByTime(1_500);
+
+            expect(
+                recorder.getSnapshot().durationMs,
+            ).toBe(1_500);
+
+            recorder.pause();
+
+            vi.advanceTimersByTime(1_000);
+
+            expect(
+                recorder.getSnapshot().durationMs,
+            ).toBe(1_500);
+
+            recorder.resume();
+
+            vi.advanceTimersByTime(500);
+
+            expect(
+                recorder.getSnapshot().durationMs,
+            ).toBe(2_000);
+        } finally {
+            recorder.destroy();
+            vi.useRealTimers();
+        }
+    });
+
+    it('cancels an active recording and discards its data', async () => {
+        const stopRecorder = vi.fn();
+        const stopTrack = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [
+                {
+                    stop: stopTrack,
+                },
+            ],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop = stopRecorder;
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+        recorder.cancel();
+
+        expect(stopRecorder).toHaveBeenCalledTimes(1);
+        expect(stopTrack).toHaveBeenCalledTimes(1);
+
+        expect(recorder.getSnapshot()).toEqual({
+            state: 'idle',
+            durationMs: 0,
+            recording: null,
+            error: null,
+        });
+    });
+
+    it('cancels a paused recording', async () => {
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            pause(): void {}
+
+            stop(): void {}
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+        recorder.pause();
+        recorder.cancel();
+
+        expect(recorder.getSnapshot().state).toBe('idle');
+    });
+
+    it('rejects cancelling while idle', () => {
+        const recorder = createAudioRecorder();
+
+        expect(() => recorder.cancel()).toThrow(
+            'Expected recorder state to be one of "recording", "paused", but received "idle".',
+        );
+    });
+
+    it('maps errors thrown while cancelling', async () => {
+        const cancelError = new Error('Cancel failed');
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                throw cancelError;
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+
+        expect(() => recorder.cancel()).toThrow(
+            'The audio recording could not be cancelled.',
+        );
+
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'error',
+            error: {
+                code: 'recording-failed',
+                originalError: cancelError,
+            },
+        });
+    });
+
+    it('stops automatically when the maximum duration is reached', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-08-02T12:00:00Z'));
+
+        const stopRecorder = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                stopRecorder();
+
+                this.ondataavailable?.({
+                    data: new Blob(['audio-data']),
+                } as BlobEvent);
+
+                this.onstop?.();
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            maxDurationMs: 1_000,
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            await vi.advanceTimersByTimeAsync(1_000);
+
+            expect(stopRecorder).toHaveBeenCalledTimes(1);
+            expect(recorder.getSnapshot().state).toBe('completed');
+            expect(recorder.getSnapshot().durationMs).toBe(1_000);
+        } finally {
+            recorder.destroy();
+            vi.useRealTimers();
+        }
+    });
 });

@@ -19,14 +19,17 @@ import {
 import {
     selectSupportedMimeType,
 } from './select-supported-mime-type';
+
+import {
+    getFileExtensionFromMimeType,
+} from './get-file-extension';
+
 import type {
     AudioRecording,
     RecorderSnapshot,
 } from './types';
 
-import {
-    getFileExtensionFromMimeType,
-} from './get-file-extension';
+const DURATION_UPDATE_INTERVAL_MS = 100;
 
 export type AudioRecorder = {
     getSnapshot: () => RecorderSnapshot;
@@ -67,6 +70,10 @@ export function createAudioRecorder(
     let mediaRecorder: MediaRecorder | null = null;
     let audioChunks: Blob[] = [];
     let recordingUrl: string | null = null;
+    let recordingStartedAt: number | null = null;
+    let accumulatedDurationMs = 0;
+    let durationTimer: ReturnType<typeof setInterval> | null = null;
+    let maxDurationTimer: ReturnType<typeof setTimeout> | null = null;
     let isDestroyed = false;
 
     function assertNotDestroyed(): void {
@@ -116,6 +123,230 @@ export function createAudioRecorder(
 
         URL.revokeObjectURL(recordingUrl);
         recordingUrl = null;
+    }
+
+    function getCurrentDurationMs(): number {
+        if (recordingStartedAt === null) {
+            return accumulatedDurationMs;
+        }
+
+        return (
+            accumulatedDurationMs +
+            Math.max(0, Date.now() - recordingStartedAt)
+        );
+    }
+
+    function publishDuration(): void {
+        store.update({
+            durationMs: getCurrentDurationMs(),
+        });
+    }
+
+    function startDurationTimer(): void {
+        recordingStartedAt = Date.now();
+
+        durationTimer = setInterval(
+            publishDuration,
+            DURATION_UPDATE_INTERVAL_MS,
+        );
+    }
+
+    function pauseDurationTimer(): void {
+        accumulatedDurationMs = getCurrentDurationMs();
+        recordingStartedAt = null;
+
+        if (durationTimer !== null) {
+            clearInterval(durationTimer);
+            durationTimer = null;
+        }
+
+        store.update({
+            durationMs: accumulatedDurationMs,
+        });
+    }
+
+    function resetDurationTimer(): void {
+        if (durationTimer !== null) {
+            clearInterval(durationTimer);
+            durationTimer = null;
+        }
+
+        recordingStartedAt = null;
+        accumulatedDurationMs = 0;
+    }
+
+    function clearMaxDurationTimer(): void {
+        if (maxDurationTimer !== null) {
+            clearTimeout(maxDurationTimer);
+            maxDurationTimer = null;
+        }
+    }
+
+    function startMaxDurationTimer(): void {
+        clearMaxDurationTimer();
+
+        if (normalizedOptions.maxDurationMs === null) {
+            return;
+        }
+
+        const remainingDurationMs =
+            normalizedOptions.maxDurationMs - getCurrentDurationMs();
+
+        if (remainingDurationMs <= 0) {
+            return;
+        }
+
+        maxDurationTimer = setTimeout(() => {
+            maxDurationTimer = null;
+
+            const currentState = store.getSnapshot().state;
+
+            if (
+                currentState !== 'recording' &&
+                currentState !== 'paused'
+            ) {
+                return;
+            }
+
+            void stop().catch(() => undefined);
+        }, remainingDurationMs);
+    }
+
+    async function stop(): Promise<AudioRecording> {
+        assertNotDestroyed();
+        assertStateIn([
+            'recording',
+            'paused',
+        ]);
+
+        if (mediaRecorder === null) {
+            throw createAudioRecorderError(
+                'recording-failed',
+                'The active MediaRecorder instance is unavailable.',
+            );
+        }
+
+        const activeMediaRecorder = mediaRecorder;
+
+        pauseDurationTimer();
+        clearMaxDurationTimer();
+
+        store.transition('processing');
+
+        return new Promise<AudioRecording>(
+            (resolve, reject) => {
+                activeMediaRecorder.onstop = (): void => {
+                    try {
+                        const mimeType =
+                            activeMediaRecorder.mimeType ||
+                            normalizedOptions.preferredMimeTypes[0] ||
+                            'audio/webm';
+
+                        const extension =
+                            getFileExtensionFromMimeType(mimeType);
+
+                        const blob = new Blob(audioChunks, {
+                            type: mimeType,
+                        });
+
+                        const file = new File(
+                            [blob],
+                            `${normalizedOptions.fileName}.${extension}`,
+                            {
+                                type: mimeType,
+                                lastModified: Date.now(),
+                            },
+                        );
+
+                        revokeRecordingUrl();
+
+                        recordingUrl = URL.createObjectURL(blob);
+
+                        const recording: AudioRecording = {
+                            blob,
+                            file,
+                            url: recordingUrl,
+                            durationMs: store.getSnapshot().durationMs,
+                            sizeBytes: blob.size,
+                            mimeType,
+                            extension,
+                            createdAt: new Date(),
+                        };
+
+                        stopMediaTracks();
+
+                        mediaRecorder = null;
+                        audioChunks = [];
+
+                        store.transition('completed', {
+                            recording,
+                            error: null,
+                        });
+
+                        resolve(recording);
+                    } catch (originalError) {
+                        stopMediaTracks();
+
+                        mediaRecorder = null;
+                        audioChunks = [];
+
+                        const error = createAudioRecorderError(
+                            'recording-failed',
+                            'The audio recording result could not be created.',
+                            originalError,
+                        );
+
+                        store.transition('error', {
+                            error,
+                        });
+
+                        reject(error);
+                    }
+                };
+
+                activeMediaRecorder.onerror = (
+                    event: Event,
+                ): void => {
+                    stopMediaTracks();
+
+                    mediaRecorder = null;
+                    audioChunks = [];
+
+                    const error = createAudioRecorderError(
+                        'recording-failed',
+                        'The audio recording could not be stopped.',
+                        event,
+                    );
+
+                    store.transition('error', {
+                        error,
+                    });
+
+                    reject(error);
+                };
+
+                try {
+                    activeMediaRecorder.stop();
+                } catch (originalError) {
+                    stopMediaTracks();
+
+                    mediaRecorder = null;
+                    audioChunks = [];
+
+                    const error = createAudioRecorderError(
+                        'recording-failed',
+                        'The audio recording could not be stopped.',
+                        originalError,
+                    );
+
+                    store.transition('error', {
+                        error,
+                    });
+
+                    reject(error);
+                }
+            },
+        );
     }
 
     return {
@@ -226,11 +457,16 @@ export function createAudioRecorder(
 
                 mediaRecorder.start();
 
+                resetDurationTimer();
+
                 store.transition('recording', {
                     durationMs: 0,
                     recording: null,
                     error: null,
                 });
+
+                startDurationTimer();
+                startMaxDurationTimer();
             } catch (originalError) {
                 for (const track of mediaStream.getTracks()) {
                     track.stop();
@@ -266,6 +502,8 @@ export function createAudioRecorder(
 
             try {
                 mediaRecorder.pause();
+                pauseDurationTimer();
+                clearMaxDurationTimer();
                 store.transition('paused');
             } catch (originalError) {
                 const error = createAudioRecorderError(
@@ -296,6 +534,8 @@ export function createAudioRecorder(
             try {
                 mediaRecorder.resume();
                 store.transition('recording');
+                startDurationTimer();
+                startMaxDurationTimer();
             } catch (originalError) {
                 const error = createAudioRecorderError(
                     'recording-failed',
@@ -311,7 +551,9 @@ export function createAudioRecorder(
             }
         },
 
-        async stop(): Promise<AudioRecording> {
+        stop,
+
+        cancel(): void {
             assertNotDestroyed();
             assertStateIn([
                 'recording',
@@ -327,131 +569,45 @@ export function createAudioRecorder(
 
             const activeMediaRecorder = mediaRecorder;
 
-            store.transition('processing');
+            try {
+                activeMediaRecorder.ondataavailable = null;
+                activeMediaRecorder.onstop = null;
+                activeMediaRecorder.onerror = null;
 
-            return new Promise<AudioRecording>(
-                (resolve, reject) => {
-                    activeMediaRecorder.onstop = (): void => {
-                        try {
-                            const mimeType =
-                                activeMediaRecorder.mimeType ||
-                                normalizedOptions.preferredMimeTypes[0] ||
-                                'audio/webm';
+                activeMediaRecorder.stop();
 
-                            const extension =
-                                getFileExtensionFromMimeType(mimeType);
+                resetDurationTimer();
+                clearMaxDurationTimer();
+                stopMediaTracks();
 
-                            const blob = new Blob(audioChunks, {
-                                type: mimeType,
-                            });
+                mediaRecorder = null;
+                audioChunks = [];
 
-                            const file = new File(
-                                [blob],
-                                `${normalizedOptions.fileName}.${extension}`,
-                                {
-                                    type: mimeType,
-                                    lastModified: Date.now(),
-                                },
-                            );
+                store.transition('idle', {
+                    durationMs: 0,
+                    recording: null,
+                    error: null,
+                });
+            } catch (originalError) {
+                resetDurationTimer();
+                clearMaxDurationTimer();
+                stopMediaTracks();
 
-                            revokeRecordingUrl();
+                mediaRecorder = null;
+                audioChunks = [];
 
-                            recordingUrl = URL.createObjectURL(blob);
+                const error = createAudioRecorderError(
+                    'recording-failed',
+                    'The audio recording could not be cancelled.',
+                    originalError,
+                );
 
-                            const recording: AudioRecording = {
-                                blob,
-                                file,
-                                url: recordingUrl,
-                                durationMs:
-                                store.getSnapshot().durationMs,
-                                sizeBytes: blob.size,
-                                mimeType,
-                                extension,
-                                createdAt: new Date(),
-                            };
+                store.transition('error', {
+                    error,
+                });
 
-                            stopMediaTracks();
-
-                            mediaRecorder = null;
-                            audioChunks = [];
-
-                            store.transition('completed', {
-                                recording,
-                                error: null,
-                            });
-
-                            resolve(recording);
-                        } catch (originalError) {
-                            stopMediaTracks();
-
-                            mediaRecorder = null;
-                            audioChunks = [];
-
-                            const error = createAudioRecorderError(
-                                'recording-failed',
-                                'The audio recording result could not be created.',
-                                originalError,
-                            );
-
-                            store.transition('error', {
-                                error,
-                            });
-
-                            reject(error);
-                        }
-                    };
-
-                    activeMediaRecorder.onerror = (
-                        event: Event,
-                    ): void => {
-                        stopMediaTracks();
-
-                        mediaRecorder = null;
-                        audioChunks = [];
-
-                        const error = createAudioRecorderError(
-                            'recording-failed',
-                            'The audio recording could not be stopped.',
-                            event,
-                        );
-
-                        store.transition('error', {
-                            error,
-                        });
-
-                        reject(error);
-                    };
-
-                    try {
-                        activeMediaRecorder.stop();
-                    } catch (originalError) {
-                        stopMediaTracks();
-
-                        mediaRecorder = null;
-                        audioChunks = [];
-
-                        const error = createAudioRecorderError(
-                            'recording-failed',
-                            'The audio recording could not be stopped.',
-                            originalError,
-                        );
-
-                        store.transition('error', {
-                            error,
-                        });
-
-                        reject(error);
-                    }
-                },
-            );
-        },
-
-        cancel(): void {
-            assertNotDestroyed();
-
-            throw new Error(
-                'Audio recording has not been implemented yet.',
-            );
+                throw error;
+            }
         },
 
         reset(): void {
@@ -469,6 +625,8 @@ export function createAudioRecorder(
                 );
             }
 
+            resetDurationTimer();
+            clearMaxDurationTimer();
             revokeRecordingUrl();
 
             store.transition('idle', {
@@ -483,6 +641,8 @@ export function createAudioRecorder(
                 return;
             }
 
+            resetDurationTimer();
+            clearMaxDurationTimer();
             stopMediaTracks();
             revokeRecordingUrl();
 
