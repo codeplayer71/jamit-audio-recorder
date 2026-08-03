@@ -129,6 +129,14 @@ export function createAudioRecorder(
         recordingUrl = null;
     }
 
+    function resetRecordingData(): void {
+        mediaRecorder = null;
+        audioChunks = [];
+        recordedSizeBytes = 0;
+        maxFileSizeExceeded = false;
+        maxDurationExceeded = false;
+    }
+
     function getCurrentDurationMs(): number {
         if (recordingStartedAt === null) {
             return accumulatedDurationMs;
@@ -251,12 +259,7 @@ export function createAudioRecorder(
                     try {
                         if (maxDurationExceeded) {
                             stopMediaTracks();
-
-                            mediaRecorder = null;
-                            audioChunks = [];
-                            recordedSizeBytes = 0;
-                            maxFileSizeExceeded = false;
-                            maxDurationExceeded = false;
+                            resetRecordingData();
 
                             const error = createAudioRecorderError(
                                 'max-duration-exceeded',
@@ -274,12 +277,7 @@ export function createAudioRecorder(
 
                         if (maxFileSizeExceeded) {
                             stopMediaTracks();
-
-                            mediaRecorder = null;
-                            audioChunks = [];
-                            recordedSizeBytes = 0;
-                            maxFileSizeExceeded = false;
-                            maxDurationExceeded = false;
+                            resetRecordingData();
 
                             const error = createAudioRecorderError(
                                 'max-file-size-exceeded',
@@ -332,11 +330,7 @@ export function createAudioRecorder(
 
                         stopMediaTracks();
 
-                        mediaRecorder = null;
-                        audioChunks = [];
-                        recordedSizeBytes = 0;
-                        maxFileSizeExceeded = false;
-                        maxDurationExceeded = false;
+                        resetRecordingData();
 
                         store.transition('completed', {
                             recording,
@@ -346,12 +340,7 @@ export function createAudioRecorder(
                         resolve(recording);
                     } catch (originalError) {
                         stopMediaTracks();
-
-                        mediaRecorder = null;
-                        audioChunks = [];
-                        recordedSizeBytes = 0;
-                        maxFileSizeExceeded = false;
-                        maxDurationExceeded = false;
+                        resetRecordingData();
 
                         const error = createAudioRecorderError(
                             'recording-failed',
@@ -371,12 +360,7 @@ export function createAudioRecorder(
                     event: Event,
                 ): void => {
                     stopMediaTracks();
-
-                    mediaRecorder = null;
-                    audioChunks = [];
-                    recordedSizeBytes = 0;
-                    maxFileSizeExceeded = false;
-                    maxDurationExceeded = false;
+                    resetRecordingData();
 
                     const error = createAudioRecorderError(
                         'recording-failed',
@@ -395,12 +379,7 @@ export function createAudioRecorder(
                     activeMediaRecorder.stop();
                 } catch (originalError) {
                     stopMediaTracks();
-
-                    mediaRecorder = null;
-                    audioChunks = [];
-                    recordedSizeBytes = 0;
-                    maxFileSizeExceeded = false;
-                    maxDurationExceeded = false;
+                    resetRecordingData();
 
                     const error = createAudioRecorderError(
                         'recording-failed',
@@ -562,11 +541,7 @@ export function createAudioRecorder(
                 }
 
                 mediaStream = null;
-                mediaRecorder = null;
-                audioChunks = [];
-                recordedSizeBytes = 0;
-                maxFileSizeExceeded = false;
-                maxDurationExceeded = false;
+                resetRecordingData();
                 resetDurationTimer();
                 clearMaxDurationTimer();
 
@@ -604,11 +579,7 @@ export function createAudioRecorder(
                 resetDurationTimer();
                 clearMaxDurationTimer();
                 stopMediaTracks();
-
-                mediaRecorder = null;
-                audioChunks = [];
-                recordedSizeBytes = 0;
-                maxFileSizeExceeded = false;
+                resetRecordingData();
 
                 const error = createAudioRecorderError(
                     'recording-failed',
@@ -644,11 +615,7 @@ export function createAudioRecorder(
                 resetDurationTimer();
                 clearMaxDurationTimer();
                 stopMediaTracks();
-
-                mediaRecorder = null;
-                audioChunks = [];
-                recordedSizeBytes = 0;
-                maxFileSizeExceeded = false;
+                resetRecordingData();
 
                 const error = createAudioRecorderError(
                     'recording-failed',
@@ -692,12 +659,7 @@ export function createAudioRecorder(
                 resetDurationTimer();
                 clearMaxDurationTimer();
                 stopMediaTracks();
-
-                mediaRecorder = null;
-                audioChunks = [];
-                recordedSizeBytes = 0;
-                maxFileSizeExceeded = false;
-                maxDurationExceeded = false;
+                resetRecordingData();
 
                 store.transition('idle', {
                     durationMs: 0,
@@ -708,12 +670,7 @@ export function createAudioRecorder(
                 resetDurationTimer();
                 clearMaxDurationTimer();
                 stopMediaTracks();
-
-                mediaRecorder = null;
-                audioChunks = [];
-                recordedSizeBytes = 0;
-                maxFileSizeExceeded = false;
-                maxDurationExceeded = false;
+                resetRecordingData();
 
                 const error = createAudioRecorderError(
                     'recording-failed',
@@ -747,9 +704,7 @@ export function createAudioRecorder(
             resetDurationTimer();
             clearMaxDurationTimer();
             revokeRecordingUrl();
-            recordedSizeBytes = 0;
-            maxFileSizeExceeded = false;
-            maxDurationExceeded = false;
+            resetRecordingData();
 
             store.transition('idle', {
                 durationMs: 0,
@@ -782,12 +737,7 @@ export function createAudioRecorder(
             clearMaxDurationTimer();
             stopMediaTracks();
             revokeRecordingUrl();
-
-            mediaRecorder = null;
-            audioChunks = [];
-            recordedSizeBytes = 0;
-            maxFileSizeExceeded = false;
-            maxDurationExceeded = false;
+            resetRecordingData();
 
             store.destroy();
             isDestroyed = true;
