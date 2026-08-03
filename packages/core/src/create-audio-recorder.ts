@@ -705,6 +705,21 @@ export function createAudioRecorder(
                 return;
             }
 
+            if (
+                mediaRecorder !== null &&
+                mediaRecorder.state !== 'inactive'
+            ) {
+                mediaRecorder.ondataavailable = null;
+                mediaRecorder.onstop = null;
+                mediaRecorder.onerror = null;
+
+                try {
+                    mediaRecorder.stop();
+                } catch {
+                    // Cleanup continues even if MediaRecorder.stop() fails.
+                }
+            }
+
             resetDurationTimer();
             clearMaxDurationTimer();
             stopMediaTracks();

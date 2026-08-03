@@ -917,4 +917,50 @@ describe('createAudioRecorder', () => {
         expect(recording.sizeBytes).toBe(5);
         expect(recorder.getSnapshot().state).toBe('completed');
     });
+
+    it('stops an active MediaRecorder when destroyed', async () => {
+        const stopRecorder = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'recording';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                stopRecorder();
+                this.state = 'inactive';
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+        recorder.destroy();
+
+        expect(stopRecorder).toHaveBeenCalledTimes(1);
+    });
 });
