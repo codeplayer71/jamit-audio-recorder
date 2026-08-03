@@ -1463,4 +1463,30 @@ describe('createAudioRecorder', () => {
 
         recorder.destroy();
     });
+
+    it('returns to idle after resetting a recorder error', async () => {
+        const recorder = createAudioRecorder({
+            environment: {},
+        });
+
+        await expect(recorder.start()).rejects.toMatchObject({
+            code: 'unsupported-browser',
+        });
+
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'error',
+            error: {
+                code: 'unsupported-browser',
+            },
+        });
+
+        recorder.reset();
+
+        expect(recorder.getSnapshot()).toEqual({
+            state: 'idle',
+            durationMs: 0,
+            recording: null,
+            error: null,
+        });
+    });
 });
