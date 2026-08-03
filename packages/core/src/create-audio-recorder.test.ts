@@ -1489,4 +1489,72 @@ describe('createAudioRecorder', () => {
             error: null,
         });
     });
+
+    it('rejects stopping again while the recording is processing', async () => {
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        const stopController: {
+            complete: (() => void) | null;
+        } = {
+            complete: null,
+        };
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                stopController.complete = () => {
+                    this.ondataavailable?.({
+                        data: new Blob(['audio-data']),
+                    } as BlobEvent);
+
+                    this.onstop?.();
+                };
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+
+        const firstStopPromise = recorder.stop();
+
+        expect(recorder.getSnapshot().state).toBe('processing');
+
+        await expect(recorder.stop()).rejects.toMatchObject({
+            code: 'invalid-state',
+        });
+
+        stopController.complete?.();
+
+        await expect(firstStopPromise).resolves.toMatchObject({
+            mimeType: 'audio/webm',
+        });
+
+        recorder.destroy();
+    });
 });
