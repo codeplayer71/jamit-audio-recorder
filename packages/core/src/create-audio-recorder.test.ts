@@ -1129,4 +1129,56 @@ describe('createAudioRecorder', () => {
             },
         });
     });
+
+    it('cleans up resources when starting MediaRecorder fails', async () => {
+        const stopTrack = vi.fn();
+        const startError = new Error('Start failed');
+
+        const mediaStream = {
+            getTracks: () => [
+                {
+                    stop: stopTrack,
+                },
+            ],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            start(): void {
+                throw startError;
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await expect(recorder.start()).rejects.toMatchObject({
+            code: 'recording-failed',
+            originalError: startError,
+        });
+
+        expect(stopTrack).toHaveBeenCalledTimes(1);
+
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'error',
+            error: {
+                code: 'recording-failed',
+                originalError: startError,
+            },
+        });
+    });
 });

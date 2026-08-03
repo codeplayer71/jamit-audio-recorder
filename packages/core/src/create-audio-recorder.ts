@@ -532,6 +532,11 @@ export function createAudioRecorder(
 
                 mediaStream = null;
                 mediaRecorder = null;
+                audioChunks = [];
+                recordedSizeBytes = 0;
+                maxFileSizeExceeded = false;
+                resetDurationTimer();
+                clearMaxDurationTimer();
 
                 const error = createAudioRecorderError(
                     'recording-failed',
