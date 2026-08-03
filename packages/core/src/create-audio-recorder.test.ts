@@ -867,4 +867,54 @@ describe('createAudioRecorder', () => {
             },
         });
     });
+
+    it('allows a recording that exactly matches the maximum file size', async () => {
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                this.ondataavailable?.({
+                    data: new Blob(['12345']),
+                } as BlobEvent);
+
+                this.onstop?.();
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            maxFileSizeBytes: 5,
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+
+        const recording = await recorder.stop();
+
+        expect(recording.sizeBytes).toBe(5);
+        expect(recorder.getSnapshot().state).toBe('completed');
+    });
 });
