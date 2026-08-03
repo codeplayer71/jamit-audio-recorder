@@ -45,6 +45,13 @@ app.innerHTML = `
       controls
       hidden
     ></audio>
+<a
+  id="recorder-download"
+  class="recorder__download recorder__download--disabled"
+  aria-disabled="true"
+>
+  Download recording
+</a>
   </main>
 `;
 
@@ -71,6 +78,9 @@ const errorElement =
 
 const audioElement =
     getRequiredElement<HTMLAudioElement>('#recorder-audio');
+
+const downloadElement =
+    getRequiredElement<HTMLAnchorElement>('#recorder-download');
 
 const startButton =
     getRequiredElement<HTMLButtonElement>('#start-button');
@@ -141,9 +151,21 @@ function updateUi(snapshot: RecorderSnapshot): void {
         audioElement.pause();
         audioElement.removeAttribute('src');
         audioElement.load();
+
+        downloadElement.removeAttribute('href');
+        downloadElement.removeAttribute('download');
+        downloadElement.classList.add('recorder__download--disabled');
+        downloadElement.setAttribute('aria-disabled', 'true');
+        downloadElement.tabIndex = -1;
     } else {
         audioElement.hidden = false;
         audioElement.src = snapshot.recording.url;
+
+        downloadElement.href = snapshot.recording.url;
+        downloadElement.download = snapshot.recording.file.name;
+        downloadElement.classList.remove('recorder__download--disabled');
+        downloadElement.removeAttribute('aria-disabled');
+        downloadElement.tabIndex = 0;
     }
 }
 

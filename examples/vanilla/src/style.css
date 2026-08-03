@@ -95,6 +95,31 @@ button:disabled {
   margin-top: 24px;
 }
 
+.recorder__download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 18px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #111827;
+  text-decoration: none;
+}
+
+.recorder__download:hover {
+  background: #374151;
+}
+
+.recorder__download--disabled,
+.recorder__download--disabled:hover {
+  color: #9ca3af;
+  background: #e5e7eb;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 @media (max-width: 560px) {
   .recorder {
     padding: 24px;
