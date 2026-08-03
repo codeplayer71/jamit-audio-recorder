@@ -1274,4 +1274,70 @@ describe('createAudioRecorder', () => {
             vi.useRealTimers();
         }
     });
+
+    it('revokes the recording URL when reset', async () => {
+        const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL');
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                this.ondataavailable?.({
+                    data: new Blob(['audio-data']),
+                } as BlobEvent);
+
+                this.onstop?.();
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            const recording = await recorder.stop();
+
+            recorder.reset();
+
+            expect(revokeObjectURL).toHaveBeenCalledWith(
+                recording.url,
+            );
+
+            expect(recorder.getSnapshot()).toEqual({
+                state: 'idle',
+                durationMs: 0,
+                recording: null,
+                error: null,
+            });
+        } finally {
+            recorder.destroy();
+            revokeObjectURL.mockRestore();
+        }
+    });
 });
