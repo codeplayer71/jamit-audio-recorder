@@ -963,4 +963,57 @@ describe('createAudioRecorder', () => {
 
         expect(stopRecorder).toHaveBeenCalledTimes(1);
     });
+
+    it('continues cleanup when stopping MediaRecorder during destroy fails', async () => {
+        const stopTrack = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [
+                {
+                    stop: stopTrack,
+                },
+            ],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'recording';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                throw new Error('Stop failed');
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+
+        expect(() => recorder.destroy()).not.toThrow();
+        expect(stopTrack).toHaveBeenCalledTimes(1);
+
+        await expect(recorder.start()).rejects.toThrow(
+            'Audio recorder has been destroyed.',
+        );
+    });
 });
