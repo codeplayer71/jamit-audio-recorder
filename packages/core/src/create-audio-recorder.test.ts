@@ -1403,4 +1403,64 @@ describe('createAudioRecorder', () => {
             revokeObjectURL.mockRestore();
         }
     });
+
+    it('can start a new recording after reset', async () => {
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {}
+
+            stop(): void {
+                this.ondataavailable?.({
+                    data: new Blob(['audio-data']),
+                } as BlobEvent);
+
+                this.onstop?.();
+            }
+        }
+
+        const getUserMedia = vi.fn().mockResolvedValue(
+            mediaStream,
+        );
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia,
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+        await recorder.stop();
+
+        recorder.reset();
+
+        await recorder.start();
+
+        expect(getUserMedia).toHaveBeenCalledTimes(2);
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'recording',
+            recording: null,
+            error: null,
+        });
+
+        recorder.destroy();
+    });
 });
