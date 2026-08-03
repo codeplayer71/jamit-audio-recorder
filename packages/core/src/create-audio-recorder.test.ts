@@ -1340,4 +1340,67 @@ describe('createAudioRecorder', () => {
             revokeObjectURL.mockRestore();
         }
     });
+
+    it('revokes the recording URL when destroyed', async () => {
+        const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL');
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+
+                this.ondataavailable?.({
+                    data: new Blob(['audio-data']),
+                } as BlobEvent);
+
+                this.onstop?.();
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            const recording = await recorder.stop();
+
+            recorder.destroy();
+
+            expect(revokeObjectURL).toHaveBeenCalledWith(
+                recording.url,
+            );
+        } finally {
+            revokeObjectURL.mockRestore();
+        }
+    });
 });
