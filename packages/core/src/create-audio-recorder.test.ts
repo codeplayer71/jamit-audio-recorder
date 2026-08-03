@@ -805,4 +805,66 @@ describe('createAudioRecorder', () => {
             vi.useRealTimers();
         }
     });
+
+    it('stops automatically when the maximum file size is exceeded', async () => {
+        const stopRecorder = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                queueMicrotask(() => {
+                    this.ondataavailable?.({
+                        data: new Blob(['audio-data']),
+                    } as BlobEvent);
+                });
+            }
+
+            stop(): void {
+                stopRecorder();
+                this.onstop?.();
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            maxFileSizeBytes: 5,
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await expect(recorder.start()).resolves.toBeUndefined();
+
+        await vi.waitFor(() => {
+            expect(stopRecorder).toHaveBeenCalledTimes(1);
+        });
+
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'error',
+            recording: null,
+            error: {
+                code: 'max-file-size-exceeded',
+            },
+        });
+    });
 });

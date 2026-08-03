@@ -30,6 +30,7 @@ import type {
 } from './types';
 
 const DURATION_UPDATE_INTERVAL_MS = 100;
+const AUDIO_CHUNK_INTERVAL_MS = 1_000;
 
 export type AudioRecorder = {
     getSnapshot: () => RecorderSnapshot;
@@ -69,6 +70,8 @@ export function createAudioRecorder(
     let mediaStream: MediaStream | null = null;
     let mediaRecorder: MediaRecorder | null = null;
     let audioChunks: Blob[] = [];
+    let recordedSizeBytes = 0;
+    let maxFileSizeExceeded = false;
     let recordingUrl: string | null = null;
     let recordingStartedAt: number | null = null;
     let accumulatedDurationMs = 0;
@@ -182,6 +185,13 @@ export function createAudioRecorder(
         }
     }
 
+    function hasExceededMaxFileSize(): boolean {
+        return (
+            normalizedOptions.maxFileSizeBytes !== null &&
+            recordedSizeBytes > normalizedOptions.maxFileSizeBytes
+        );
+    }
+
     function startMaxDurationTimer(): void {
         clearMaxDurationTimer();
 
@@ -237,6 +247,27 @@ export function createAudioRecorder(
             (resolve, reject) => {
                 activeMediaRecorder.onstop = (): void => {
                     try {
+                        if (maxFileSizeExceeded) {
+                            stopMediaTracks();
+
+                            mediaRecorder = null;
+                            audioChunks = [];
+                            recordedSizeBytes = 0;
+                            maxFileSizeExceeded = false;
+
+                            const error = createAudioRecorderError(
+                                'max-file-size-exceeded',
+                                'The maximum audio recording file size was exceeded.',
+                            );
+
+                            store.transition('error', {
+                                recording: null,
+                                error,
+                            });
+
+                            reject(error);
+                            return;
+                        }
                         const mimeType =
                             activeMediaRecorder.mimeType ||
                             normalizedOptions.preferredMimeTypes[0] ||
@@ -277,6 +308,8 @@ export function createAudioRecorder(
 
                         mediaRecorder = null;
                         audioChunks = [];
+                        recordedSizeBytes = 0;
+                        maxFileSizeExceeded = false;
 
                         store.transition('completed', {
                             recording,
@@ -289,6 +322,8 @@ export function createAudioRecorder(
 
                         mediaRecorder = null;
                         audioChunks = [];
+                        recordedSizeBytes = 0;
+                        maxFileSizeExceeded = false;
 
                         const error = createAudioRecorderError(
                             'recording-failed',
@@ -311,6 +346,8 @@ export function createAudioRecorder(
 
                     mediaRecorder = null;
                     audioChunks = [];
+                    recordedSizeBytes = 0;
+                    maxFileSizeExceeded = false;
 
                     const error = createAudioRecorderError(
                         'recording-failed',
@@ -332,6 +369,8 @@ export function createAudioRecorder(
 
                     mediaRecorder = null;
                     audioChunks = [];
+                    recordedSizeBytes = 0;
+                    maxFileSizeExceeded = false;
 
                     const error = createAudioRecorderError(
                         'recording-failed',
@@ -439,6 +478,8 @@ export function createAudioRecorder(
 
             try {
                 audioChunks = [];
+                recordedSizeBytes = 0;
+                maxFileSizeExceeded = false;
 
                 mediaRecorder = new MediaRecorderConstructor(
                     mediaStream,
@@ -452,10 +493,27 @@ export function createAudioRecorder(
                 ): void => {
                     if (event.data.size > 0) {
                         audioChunks.push(event.data);
+                        recordedSizeBytes += event.data.size;
+
+                        if (
+                            hasExceededMaxFileSize() &&
+                            !maxFileSizeExceeded
+                        ) {
+                            maxFileSizeExceeded = true;
+
+                            const currentState = store.getSnapshot().state;
+
+                            if (
+                                currentState === 'recording' ||
+                                currentState === 'paused'
+                            ) {
+                                void stop().catch(() => undefined);
+                            }
+                        }
                     }
                 };
 
-                mediaRecorder.start();
+                mediaRecorder.start(AUDIO_CHUNK_INTERVAL_MS);
 
                 resetDurationTimer();
 
@@ -582,6 +640,8 @@ export function createAudioRecorder(
 
                 mediaRecorder = null;
                 audioChunks = [];
+                recordedSizeBytes = 0;
+                maxFileSizeExceeded = false;
 
                 store.transition('idle', {
                     durationMs: 0,
@@ -595,6 +655,8 @@ export function createAudioRecorder(
 
                 mediaRecorder = null;
                 audioChunks = [];
+                recordedSizeBytes = 0;
+                maxFileSizeExceeded = false;
 
                 const error = createAudioRecorderError(
                     'recording-failed',
@@ -628,6 +690,8 @@ export function createAudioRecorder(
             resetDurationTimer();
             clearMaxDurationTimer();
             revokeRecordingUrl();
+            recordedSizeBytes = 0;
+            maxFileSizeExceeded = false;
 
             store.transition('idle', {
                 durationMs: 0,
@@ -648,6 +712,8 @@ export function createAudioRecorder(
 
             mediaRecorder = null;
             audioChunks = [];
+            recordedSizeBytes = 0;
+            maxFileSizeExceeded = false;
 
             store.destroy();
             isDestroyed = true;
