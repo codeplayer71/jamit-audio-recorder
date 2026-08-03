@@ -798,7 +798,15 @@ describe('createAudioRecorder', () => {
             await vi.advanceTimersByTimeAsync(1_000);
 
             expect(stopRecorder).toHaveBeenCalledTimes(1);
-            expect(recorder.getSnapshot().state).toBe('completed');
+
+            expect(recorder.getSnapshot()).toMatchObject({
+                state: 'error',
+                recording: null,
+                error: {
+                    code: 'max-duration-exceeded',
+                },
+            });
+
             expect(recorder.getSnapshot().durationMs).toBe(1_000);
         } finally {
             recorder.destroy();
