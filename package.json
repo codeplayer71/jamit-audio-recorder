@@ -10,12 +10,14 @@
     "pnpm": ">=10"
   },
   "scripts": {
+    "build": "pnpm --recursive build",
     "test": "pnpm --recursive test",
     "typecheck": "pnpm --recursive typecheck",
     "check": "pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
+    "tsdown": "^0.22.14",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }
