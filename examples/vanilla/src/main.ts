@@ -53,6 +53,16 @@ app.innerHTML = `
   Download recording
 </a>
   </main>
+  <footer class="recorder__footer">
+  Created by
+  <a
+    href="https://jamit.one"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    JamIT
+  </a>
+</footer>
 `;
 
 function getRequiredElement<T extends Element>(
