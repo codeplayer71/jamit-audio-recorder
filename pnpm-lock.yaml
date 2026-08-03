@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@jamit/audio-recorder-core':
+        specifier: workspace:*
+        version: link:packages/core
       '@types/node':
         specifier: ^26.1.2
         version: 26.1.2

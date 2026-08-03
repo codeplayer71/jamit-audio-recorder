@@ -12,10 +12,12 @@
   "scripts": {
     "build": "pnpm --recursive build",
     "test": "pnpm --recursive test",
+    "test:core-import": "pnpm build && node scripts/test-core-import.mjs",
     "typecheck": "pnpm --recursive typecheck",
     "check": "pnpm typecheck && pnpm test"
   },
   "devDependencies": {
+    "@jamit/audio-recorder-core": "workspace:*",
     "@types/node": "^26.1.2",
     "tsdown": "^0.22.14",
     "typescript": "^7.0.2",
