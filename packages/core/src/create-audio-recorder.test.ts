@@ -1016,4 +1016,117 @@ describe('createAudioRecorder', () => {
             'Audio recorder has been destroyed.',
         );
     });
+
+    it('cleans up resources when pausing fails', async () => {
+        const stopTrack = vi.fn();
+        const pauseError = new Error('Pause failed');
+
+        const mediaStream = {
+            getTracks: () => [
+                {
+                    stop: stopTrack,
+                },
+            ],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            start(): void {}
+
+            pause(): void {
+                throw pauseError;
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+
+        expect(() => recorder.pause()).toThrow(
+            'The audio recording could not be paused.',
+        );
+
+        expect(stopTrack).toHaveBeenCalledTimes(1);
+
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'error',
+            error: {
+                code: 'recording-failed',
+                originalError: pauseError,
+            },
+        });
+    });
+
+    it('cleans up resources when resuming fails', async () => {
+        const stopTrack = vi.fn();
+        const resumeError = new Error('Resume failed');
+
+        const mediaStream = {
+            getTracks: () => [
+                {
+                    stop: stopTrack,
+                },
+            ],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            start(): void {}
+
+            pause(): void {}
+
+            resume(): void {
+                throw resumeError;
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        await recorder.start();
+        recorder.pause();
+
+        expect(() => recorder.resume()).toThrow(
+            'The audio recording could not be resumed.',
+        );
+
+        expect(stopTrack).toHaveBeenCalledTimes(1);
+
+        expect(recorder.getSnapshot()).toMatchObject({
+            state: 'error',
+            error: {
+                code: 'recording-failed',
+                originalError: resumeError,
+            },
+        });
+    });
 });

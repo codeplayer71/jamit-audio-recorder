@@ -564,6 +564,15 @@ export function createAudioRecorder(
                 clearMaxDurationTimer();
                 store.transition('paused');
             } catch (originalError) {
+                resetDurationTimer();
+                clearMaxDurationTimer();
+                stopMediaTracks();
+
+                mediaRecorder = null;
+                audioChunks = [];
+                recordedSizeBytes = 0;
+                maxFileSizeExceeded = false;
+
                 const error = createAudioRecorderError(
                     'recording-failed',
                     'The audio recording could not be paused.',
@@ -595,6 +604,15 @@ export function createAudioRecorder(
                 startDurationTimer();
                 startMaxDurationTimer();
             } catch (originalError) {
+                resetDurationTimer();
+                clearMaxDurationTimer();
+                stopMediaTracks();
+
+                mediaRecorder = null;
+                audioChunks = [];
+                recordedSizeBytes = 0;
+                maxFileSizeExceeded = false;
+
                 const error = createAudioRecorderError(
                     'recording-failed',
                     'The audio recording could not be resumed.',
