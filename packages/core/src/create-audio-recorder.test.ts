@@ -1189,4 +1189,89 @@ describe('createAudioRecorder', () => {
             },
         });
     });
+
+    it('does not count paused time toward the maximum duration', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-08-03T05:00:00Z'));
+
+        const stopRecorder = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+            mimeType = 'audio/webm';
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            pause(): void {
+                this.state = 'paused';
+            }
+
+            resume(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                stopRecorder();
+                this.state = 'inactive';
+                this.onstop?.();
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            maxDurationMs: 1_000,
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            await vi.advanceTimersByTimeAsync(600);
+
+            recorder.pause();
+
+            await vi.advanceTimersByTimeAsync(2_000);
+
+            expect(stopRecorder).not.toHaveBeenCalled();
+
+            recorder.resume();
+
+            await vi.advanceTimersByTimeAsync(400);
+
+            expect(stopRecorder).toHaveBeenCalledTimes(1);
+
+            expect(recorder.getSnapshot()).toMatchObject({
+                state: 'error',
+                error: {
+                    code: 'max-duration-exceeded',
+                },
+            });
+        } finally {
+            recorder.destroy();
+            vi.useRealTimers();
+        }
+    });
 });
