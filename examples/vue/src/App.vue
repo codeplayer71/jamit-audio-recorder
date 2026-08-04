@@ -141,15 +141,15 @@ function resetRecording(): void {
     >
       Download recording
     </a>
+    <footer class="recorder__footer">
+      Created by
+      <a
+          href="https://jamit.one"
+          target="_blank"
+          rel="noopener noreferrer"
+      >
+        JamIT
+      </a>
+    </footer>
   </main>
-  <footer class="recorder__footer">
-    Created by
-    <a
-        href="https://jamit.one"
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-      JamIT
-    </a>
-  </footer>
 </template>

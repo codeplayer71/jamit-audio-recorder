@@ -120,6 +120,25 @@ button:disabled {
   pointer-events: none;
 }
 
+.recorder__footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.recorder__footer a {
+  color: #111827;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.recorder__footer a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 560px) {
   .recorder {
     padding: 24px;
