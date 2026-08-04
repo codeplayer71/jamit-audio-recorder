@@ -40,7 +40,15 @@ export function useAudioRecorder(
 
     const snapshot = computed(() => currentSnapshot.value);
 
+    let isDestroyed = false;
+
     function destroy(): void {
+        if (isDestroyed) {
+            return;
+        }
+
+        isDestroyed = true;
+
         unsubscribe();
         recorder.destroy();
     }
