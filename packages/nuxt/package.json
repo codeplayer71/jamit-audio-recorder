@@ -1,0 +1,33 @@
+{
+  "name": "@jamit/audio-recorder-nuxt",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/module.mjs",
+  "types": "./dist/types.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "nuxt-module-build build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jamit/audio-recorder-vue": "workspace:*"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.0.0"
+  },
+  "devDependencies": {
+    "@nuxt/kit": "^4.0.0",
+    "@nuxt/module-builder": "^1.0.0",
+    "@nuxt/schema": "^4.0.0",
+    "nuxt": "^4.0.0"
+  }
+}
