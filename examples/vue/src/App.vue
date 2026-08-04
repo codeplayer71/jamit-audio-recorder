@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import {
-  createAudioRecorder,
-  type RecorderSnapshot,
-} from '@jamit/audio-recorder-core';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { useAudioRecorder } from '@jamit/audio-recorder-vue';
+import { computed } from 'vue';
 
-const recorder = createAudioRecorder({
+const {
+  snapshot,
+  start,
+  pause,
+  resume,
+  stop,
+  cancel,
+  reset,
+} = useAudioRecorder({
   maxDurationMs: 120_000,
   maxFileSizeBytes: 10_000_000,
   audioConstraints: {
@@ -14,12 +19,6 @@ const recorder = createAudioRecorder({
     noiseSuppression: true,
     autoGainControl: true,
   },
-});
-
-const snapshot = ref<RecorderSnapshot>(recorder.getSnapshot());
-
-const unsubscribe = recorder.subscribe((nextSnapshot) => {
-  snapshot.value = nextSnapshot;
 });
 
 const formattedDuration = computed(() => {
@@ -31,33 +30,29 @@ const formattedDuration = computed(() => {
 });
 
 async function startRecording(): Promise<void> {
-  await recorder.start();
+  await start();
 }
 
 function pauseRecording(): void {
-  recorder.pause();
+  pause();
 }
 
 function resumeRecording(): void {
-  recorder.resume();
+  resume();
 }
 
 async function stopRecording(): Promise<void> {
-  await recorder.stop();
+  await stop();
 }
 
 function cancelRecording(): void {
-  recorder.cancel();
+  cancel();
 }
 
 function resetRecording(): void {
-  recorder.reset();
+  reset();
 }
 
-onBeforeUnmount(() => {
-  unsubscribe();
-  recorder.destroy();
-});
 </script>
 
 <template>
