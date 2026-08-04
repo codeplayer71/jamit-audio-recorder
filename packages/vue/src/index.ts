@@ -1,3 +1,4 @@
+export { default as JamItAudioRecorder } from './components/JamItAudioRecorder.vue';
 export { useAudioRecorder } from './use-audio-recorder';
 
 export type {

@@ -18,9 +18,12 @@
   },
   "devDependencies": {
     "@jamit/audio-recorder-core": "workspace:*",
+    "@tsdown/css": "^0.22.14",
     "@types/node": "^26.1.2",
-    "tsdown": "^0.15.12",
+    "tsdown": "^0.22.14",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.10"
+    "unplugin-vue": "^7.2.0",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.9"
   }
 }

@@ -1,11 +1,22 @@
 import { defineConfig } from 'tsdown';
+import Vue from 'unplugin-vue/rolldown';
 
 export default defineConfig({
-    entry: ['src/index.ts'],
+    entry: ['./src/index.ts'],
     format: ['esm'],
-    dts: true,
+    platform: 'neutral',
+    plugins: [
+        Vue({
+            isProduction: true,
+        }),
+    ],
+    dts: {
+        vue: true,
+    },
     clean: true,
     sourcemap: true,
     target: 'es2022',
-    external: ['vue'],
+    deps: {
+        neverBundle: ['vue'],
+    },
 });
