@@ -2,18 +2,43 @@
   "name": "@jamit/audio-recorder-core",
   "version": "0.0.0",
   "private": true,
-  "description": "Framework-independent browser audio recording core.",
-
+  "description": "Framework-independent and fully typed browser audio recording core based on the MediaRecorder API.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "browser",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "recording",
+    "typescript",
+    "vanilla-javascript",
+    "web-audio"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
   "type": "module",
   "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     }
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
   "files": [
     "dist"
   ],
@@ -22,5 +47,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

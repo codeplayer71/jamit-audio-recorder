@@ -2,7 +2,38 @@
   "name": "@jamit/audio-recorder-vue",
   "version": "0.0.0",
   "private": true,
+  "description": "Fully typed Vue audio recorder composable and ready-to-use recorder component based on the MediaRecorder API.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "composition-api",
+    "composable",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "recording",
+    "typescript",
+    "vue",
+    "vue3"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
   "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "style": "./dist/style.css",
@@ -34,5 +65,8 @@
     "vite": "7.3.6",
     "vitest": "^3.2.4",
     "vue": "^3.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

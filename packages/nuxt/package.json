@@ -2,7 +2,36 @@
   "name": "@jamit/audio-recorder-nuxt",
   "version": "0.0.0",
   "private": true,
+  "description": "Nuxt module for automatic audio recorder composable imports, component registration and default styles.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "nuxt",
+    "nuxt-module",
+    "recording",
+    "typescript",
+    "vue",
+    "voice-recorder"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
+    "directory": "packages/nuxt"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/module.mjs",
   "types": "./dist/types.d.mts",
   "exports": {
@@ -29,5 +58,8 @@
     "@nuxt/module-builder": "^1.0.0",
     "@nuxt/schema": "^4.0.0",
     "nuxt": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

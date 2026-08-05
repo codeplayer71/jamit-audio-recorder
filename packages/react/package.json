@@ -2,7 +2,38 @@
   "name": "@jamit/audio-recorder-react",
   "version": "0.0.0",
   "private": true,
+  "description": "Fully typed React audio recorder hook and ready-to-use recorder component based on the MediaRecorder API.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "hook",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "react",
+    "react-hook",
+    "recording",
+    "typescript",
+    "voice-recorder"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
   "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "style": "./dist/style.css",
@@ -33,5 +64,8 @@
     "jsdom": "^26.1.0",
     "react": "^19.0.0",
     "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

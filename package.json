@@ -2,7 +2,33 @@
   "name": "jamit-audio-recorder",
   "version": "0.0.0",
   "private": true,
-  "description": "Reliable browser audio recording for Vue, Nuxt, React and TypeScript, powered by one shared framework-independent core.",
+  "description": "Reliable and fully typed browser audio recording for Vue, Nuxt, React and Vanilla TypeScript, powered by a shared framework-independent core.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "nuxt",
+    "react",
+    "recording",
+    "typescript",
+    "vue",
+    "voice-recorder"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@10.18.1",
   "engines": {
