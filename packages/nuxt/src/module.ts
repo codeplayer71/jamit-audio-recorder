@@ -1,5 +1,6 @@
 import type { NuxtModule } from '@nuxt/schema';
 import {
+    addComponent,
     addImports,
     createResolver,
     defineNuxtModule,
@@ -16,7 +17,7 @@ const audioRecorderModule: NuxtModule<ModuleOptions> =
 
         defaults: {},
 
-        setup() {
+        setup(_options, nuxt) {
             const resolver = createResolver(import.meta.url);
 
             addImports({
@@ -25,6 +26,14 @@ const audioRecorderModule: NuxtModule<ModuleOptions> =
                     './runtime/app/composables/useAudioRecorder',
                 ),
             });
+
+            addComponent({
+                name: 'JamItAudioRecorder',
+                export: 'JamItAudioRecorder',
+                filePath: '@jamit/audio-recorder-vue',
+            });
+
+            nuxt.options.css.push('@jamit/audio-recorder-vue/style.css');
         },
     });
 

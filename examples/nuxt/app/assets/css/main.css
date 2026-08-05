@@ -27,26 +27,6 @@ audio {
     font: inherit;
 }
 
-button {
-    min-height: 44px;
-    padding: 0 18px;
-    border: 0;
-    border-radius: 8px;
-    color: #ffffff;
-    background: #111827;
-    cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-    background: #374151;
-}
-
-button:disabled {
-    color: #9ca3af;
-    background: #e5e7eb;
-    cursor: not-allowed;
-}
-
 #__nuxt {
     min-height: 100vh;
     display: grid;
@@ -54,102 +34,6 @@ button:disabled {
     padding: 24px;
 }
 
-.recorder {
+.demo {
     width: min(100%, 720px);
-    padding: 32px;
-    border-radius: 16px;
-    background: #ffffff;
-    box-shadow: 0 16px 40px rgb(15 23 42 / 10%);
-}
-
-.recorder h1 {
-    margin: 0 0 24px;
-    font-size: clamp(1.75rem, 5vw, 2.5rem);
-}
-
-.recorder p {
-    margin: 12px 0;
-}
-
-.recorder__status strong {
-    text-transform: capitalize;
-}
-
-.recorder__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
-}
-
-.recorder__error {
-    margin-top: 24px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    color: #991b1b;
-    background: #fee2e2;
-}
-
-.recorder audio {
-    width: 100%;
-    margin-top: 24px;
-}
-
-.recorder__download {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    margin-top: 16px;
-    padding: 0 18px;
-    border-radius: 8px;
-    color: #ffffff;
-    background: #111827;
-    text-decoration: none;
-}
-
-.recorder__download:hover {
-    background: #374151;
-}
-
-.recorder__download--disabled,
-.recorder__download--disabled:hover {
-    color: #9ca3af;
-    background: #e5e7eb;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.recorder__footer {
-    margin-top: 32px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
-    color: #6b7280;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-.recorder__footer a {
-    color: #111827;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.recorder__footer a:hover {
-    text-decoration: underline;
-}
-
-@media (max-width: 560px) {
-    .recorder {
-        padding: 24px;
-    }
-
-    .recorder__actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .recorder__actions button {
-        width: 100%;
-    }
 }
