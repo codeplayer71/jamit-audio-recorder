@@ -1,6 +1,6 @@
 {
-  "name": "@jamit/audio-recorder-nuxt",
-  "version": "1.0.0",
+  "name": "@codeplayer71/audio-recorder-nuxt",
+  "version": "0.0.0",
   "description": "Nuxt module for automatic audio recorder composable imports, component registration and default styles.",
   "keywords": [
     "audio",
@@ -47,7 +47,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@jamit/audio-recorder-vue": "workspace:*"
+    "@codeplayer71/audio-recorder-vue": "workspace:*"
   },
   "peerDependencies": {
     "nuxt": "^4.0.0"

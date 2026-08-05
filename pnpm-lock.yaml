@@ -11,7 +11,7 @@ importers:
       '@changesets/cli':
         specifier: ^2.31.1
         version: 2.31.1(@types/node@26.1.2)
-      '@jamit/audio-recorder-core':
+      '@codeplayer71/audio-recorder-core':
         specifier: workspace:*
         version: link:packages/core
       '@tsdown/css':
@@ -38,7 +38,7 @@ importers:
 
   examples/nuxt:
     dependencies:
-      '@jamit/audio-recorder-nuxt':
+      '@codeplayer71/audio-recorder-nuxt':
         specifier: workspace:*
         version: link:../../packages/nuxt
       nuxt:
@@ -53,7 +53,7 @@ importers:
 
   examples/react:
     dependencies:
-      '@jamit/audio-recorder-react':
+      '@codeplayer71/audio-recorder-react':
         specifier: workspace:*
         version: link:../../packages/react
       react:
@@ -87,7 +87,7 @@ importers:
 
   examples/vanilla:
     dependencies:
-      '@jamit/audio-recorder-core':
+      '@codeplayer71/audio-recorder-core':
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -100,10 +100,10 @@ importers:
 
   examples/vue:
     dependencies:
-      '@jamit/audio-recorder-core':
+      '@codeplayer71/audio-recorder-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@jamit/audio-recorder-vue':
+      '@codeplayer71/audio-recorder-vue':
         specifier: workspace:*
         version: link:../../packages/vue
       vue:
@@ -133,7 +133,7 @@ importers:
 
   packages/nuxt:
     dependencies:
-      '@jamit/audio-recorder-vue':
+      '@codeplayer71/audio-recorder-vue':
         specifier: workspace:*
         version: link:../vue
     devDependencies:
@@ -152,7 +152,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@jamit/audio-recorder-core':
+      '@codeplayer71/audio-recorder-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -174,7 +174,7 @@ importers:
 
   packages/vue:
     dependencies:
-      '@jamit/audio-recorder-core':
+      '@codeplayer71/audio-recorder-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

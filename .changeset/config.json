@@ -4,10 +4,10 @@
   "commit": false,
   "fixed": [
     [
-      "@jamit/audio-recorder-core",
-      "@jamit/audio-recorder-vue",
-      "@jamit/audio-recorder-react",
-      "@jamit/audio-recorder-nuxt"
+      "@codeplayer71/audio-recorder-core",
+      "@codeplayer71/audio-recorder-vue",
+      "@codeplayer71/audio-recorder-react",
+      "@codeplayer71/audio-recorder-nuxt"
     ]
   ],
   "linked": [],

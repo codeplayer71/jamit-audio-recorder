@@ -14,7 +14,7 @@ import {
 } from 'vitest';
 
 import { JamItAudioRecorder } from './JamItAudioRecorder';
-import type { RecorderSnapshot } from '@jamit/audio-recorder-core';
+import type { RecorderSnapshot } from '@codeplayer71/audio-recorder-core';
 import { useAudioRecorder } from '../use-audio-recorder';
 
 const recorderMock = vi.hoisted(() => ({

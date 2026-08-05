@@ -36,13 +36,13 @@ jobs:
 
       - name: Build workspace packages
         run: |
-         pnpm --filter @jamit/audio-recorder-core build
-         pnpm --filter @jamit/audio-recorder-vue build
-         pnpm --filter @jamit/audio-recorder-react build
-         pnpm --filter @jamit/audio-recorder-nuxt build
+         pnpm --filter @codeplayer71/audio-recorder-core build
+         pnpm --filter @codeplayer71/audio-recorder-vue build
+         pnpm --filter @codeplayer71/audio-recorder-react build
+         pnpm --filter @codeplayer71/audio-recorder-nuxt build
 
       - name: Prepare Nuxt example
-        run: pnpm --filter @jamit/audio-recorder-example-nuxt exec nuxt prepare
+        run: pnpm --filter @codeplayer71/audio-recorder-example-nuxt exec nuxt prepare
 
       - name: Typecheck
         run: pnpm typecheck

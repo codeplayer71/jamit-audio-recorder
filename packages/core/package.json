@@ -1,6 +1,6 @@
 {
-  "name": "@jamit/audio-recorder-core",
-  "version": "1.0.0",
+  "name": "@codeplayer71/audio-recorder-core",
+  "version": "0.0.0",
   "description": "Framework-independent and fully typed browser audio recording core based on the MediaRecorder API.",
   "keywords": [
     "audio",

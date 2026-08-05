@@ -2,4 +2,4 @@ export {
     useAudioRecorder,
     type UseAudioRecorderOptions,
     type UseAudioRecorderReturn,
-} from '@jamit/audio-recorder-vue';
+} from '@codeplayer71/audio-recorder-vue';

@@ -1,7 +1,7 @@
 import { effectScope } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAudioRecorder } from './use-audio-recorder';
-import type { RecorderSnapshot } from '@jamit/audio-recorder-core';
+import type { RecorderSnapshot } from '@codeplayer71/audio-recorder-core';
 
 const unsubscribeMock = vi.fn();
 
@@ -17,7 +17,7 @@ const recorderMock = vi.hoisted(() => ({
     subscribe: vi.fn(),
 }));
 
-vi.mock('@jamit/audio-recorder-core', () => ({
+vi.mock('@codeplayer71/audio-recorder-core', () => ({
     createAudioRecorder: vi.fn(() => recorderMock),
 }));
 

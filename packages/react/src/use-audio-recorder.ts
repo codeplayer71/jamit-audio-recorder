@@ -1,7 +1,7 @@
 import {
     createAudioRecorder,
     type RecorderSnapshot,
-} from '@jamit/audio-recorder-core';
+} from '@codeplayer71/audio-recorder-core';
 import {
     useCallback,
     useEffect,

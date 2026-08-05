@@ -11,7 +11,7 @@ export interface ModuleOptions {}
 const audioRecorderModule: NuxtModule<ModuleOptions> =
     defineNuxtModule<ModuleOptions>({
         meta: {
-            name: '@jamit/audio-recorder-nuxt',
+            name: '@codeplayer71/audio-recorder-nuxt',
             configKey: 'audioRecorder',
         },
 
@@ -30,10 +30,10 @@ const audioRecorderModule: NuxtModule<ModuleOptions> =
             addComponent({
                 name: 'JamItAudioRecorder',
                 export: 'JamItAudioRecorder',
-                filePath: '@jamit/audio-recorder-vue',
+                filePath: '@codeplayer71/audio-recorder-vue',
             });
 
-            nuxt.options.css.push('@jamit/audio-recorder-vue/style.css');
+            nuxt.options.css.push('@codeplayer71/audio-recorder-vue/style.css');
         },
     });
 

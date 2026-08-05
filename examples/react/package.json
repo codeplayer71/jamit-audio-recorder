@@ -1,5 +1,5 @@
 {
-  "name": "@jamit/audio-recorder-example-react",
+  "name": "@codeplayer71/audio-recorder-example-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jamit/audio-recorder-react": "workspace:*",
+    "@codeplayer71/audio-recorder-react": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

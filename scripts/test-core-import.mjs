@@ -1,7 +1,7 @@
 import {
     createAudioRecorder,
     DEFAULT_PREFERRED_MIME_TYPES,
-} from '@jamit/audio-recorder-core';
+} from '@codeplayer71/audio-recorder-core';
 
 console.log({
     hasCreateAudioRecorder:
