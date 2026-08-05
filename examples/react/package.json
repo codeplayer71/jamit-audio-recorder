@@ -1,5 +1,5 @@
 {
-  "name": "react",
+  "name": "@jamit/audio-recorder-example-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",

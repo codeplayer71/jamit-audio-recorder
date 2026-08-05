@@ -1,7 +1,6 @@
 {
   "name": "@jamit/audio-recorder-nuxt",
   "version": "0.0.0",
-  "private": true,
   "description": "Nuxt module for automatic audio recorder composable imports, component registration and default styles.",
   "keywords": [
     "audio",

@@ -40,9 +40,13 @@
     "test": "pnpm --recursive test",
     "test:core-import": "pnpm build && node scripts/test-core-import.mjs",
     "typecheck": "pnpm --recursive typecheck",
-    "check": "pnpm typecheck && pnpm test"
+    "check": "pnpm typecheck && pnpm test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@jamit/audio-recorder-core": "workspace:*",
     "@tsdown/css": "^0.22.14",
     "@types/node": "^26.1.2",

@@ -1,6 +1,5 @@
 {
-  "name": "nuxt",
-  "type": "module",
+  "name": "@jamit/audio-recorder-example-nuxt",
   "private": true,
   "scripts": {
     "build": "nuxt build",
