@@ -2,7 +2,6 @@ import {
     createAudioRecorder,
     type RecorderSnapshot,
 } from '@jamit/audio-recorder-core';
-
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -12,56 +11,229 @@ if (app === null) {
 }
 
 app.innerHTML = `
-  <main class="recorder">
-    <h1>JamIT Audio Recorder</h1>
+  <main class="jamit-audio-recorder">
+    <header class="jamit-audio-recorder__header">
+      <h1 class="jamit-audio-recorder__title">
+        Audio Recorder
+      </h1>
+    </header>
 
-    <p class="recorder__status">
-      Status:
-      <strong id="recorder-status">idle</strong>
-    </p>
+    <div class="jamit-audio-recorder__meta">
+      <p class="jamit-audio-recorder__status">
+        <span class="jamit-audio-recorder__label">
+          Status
+        </span>
 
-    <p>
-      Duration:
-      <strong id="recorder-duration">0.0 s</strong>
-    </p>
+        <strong
+          id="recorder-state"
+          class="jamit-audio-recorder__state"
+        >
+          idle
+        </strong>
+      </p>
 
-    <div class="recorder__actions">
-      <button id="start-button" type="button">Start</button>
-      <button id="pause-button" type="button">Pause</button>
-      <button id="resume-button" type="button">Resume</button>
-      <button id="stop-button" type="button">Stop</button>
-      <button id="cancel-button" type="button">Cancel</button>
-      <button id="reset-button" type="button">Reset</button>
+      <p class="jamit-audio-recorder__duration">
+        <span class="jamit-audio-recorder__label">
+          Duration
+        </span>
+
+        <strong id="recorder-duration">
+          00:00
+        </strong>
+      </p>
+    </div>
+
+    <div class="jamit-audio-recorder__controls">
+      <button
+        id="recorder-start"
+        type="button"
+        class="
+          jamit-audio-recorder__button
+          jamit-audio-recorder__button--primary
+        "
+      >
+        <svg
+          class="jamit-audio-recorder__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="6"
+            fill="currentColor"
+          />
+        </svg>
+
+        <span>Start recording</span>
+      </button>
+
+      <button
+        id="recorder-pause"
+        type="button"
+        class="jamit-audio-recorder__button"
+        disabled
+      >
+        <svg
+          class="jamit-audio-recorder__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M7 5h4v14H7zM13 5h4v14h-4z"
+            fill="currentColor"
+          />
+        </svg>
+
+        <span>Pause</span>
+      </button>
+
+      <button
+        id="recorder-resume"
+        type="button"
+        class="jamit-audio-recorder__button"
+        disabled
+      >
+        <svg
+          class="jamit-audio-recorder__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M8 5v14l11-7z"
+            fill="currentColor"
+          />
+        </svg>
+
+        <span>Resume</span>
+      </button>
+
+      <button
+        id="recorder-stop"
+        type="button"
+        class="jamit-audio-recorder__button"
+        disabled
+      >
+        <svg
+          class="jamit-audio-recorder__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <rect
+            x="6"
+            y="6"
+            width="12"
+            height="12"
+            rx="1"
+            fill="currentColor"
+          />
+        </svg>
+
+        <span>Stop</span>
+      </button>
+
+      <button
+        id="recorder-cancel"
+        type="button"
+        class="
+          jamit-audio-recorder__button
+          jamit-audio-recorder__button--danger
+        "
+        disabled
+      >
+        <svg
+          class="jamit-audio-recorder__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M7 7l10 10M17 7L7 17"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-width="2.5"
+          />
+        </svg>
+
+        <span>Cancel</span>
+      </button>
+
+      <button
+        id="recorder-reset"
+        type="button"
+        class="jamit-audio-recorder__button"
+        disabled
+      >
+        <svg
+          class="jamit-audio-recorder__icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            d="M5 8V4m0 0h4M5 4l3 3a7 7 0 1 1-1.45 7.62"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          />
+        </svg>
+
+        <span>Reset</span>
+      </button>
     </div>
 
     <p
       id="recorder-error"
-      class="recorder__error"
+      class="jamit-audio-recorder__error"
+      role="alert"
       hidden
     ></p>
 
     <audio
       id="recorder-audio"
+      class="jamit-audio-recorder__player"
       controls
       hidden
     ></audio>
-<a
-  id="recorder-download"
-  class="recorder__download recorder__download--disabled"
-  aria-disabled="true"
->
-  Download recording
-</a>
- <footer class="recorder__footer">
-  Created by
-  <a
-    href="https://jamit.one"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    JamIT
-  </a>
-</footer>
+
+    <a
+      id="recorder-download"
+      class="
+        jamit-audio-recorder__download
+        jamit-audio-recorder__download--disabled
+      "
+      aria-disabled="true"
+      tabindex="-1"
+    >
+      <svg
+        class="jamit-audio-recorder__icon"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+        />
+      </svg>
+
+      <span>Download recording</span>
+    </a>
+
+    <footer class="jamit-audio-recorder__footer">
+      Created by
+      <a
+        href="https://jamit.one"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        JamIT
+      </a>
+    </footer>
   </main>
 `;
 
@@ -71,20 +243,20 @@ function getRequiredElement<T extends Element>(
     const element = document.querySelector<T>(selector);
 
     if (element === null) {
-        throw new Error(`Element "${selector}" was not found.`);
+        throw new Error(`Required element was not found: ${selector}`);
     }
 
     return element;
 }
 
-const statusElement =
-    getRequiredElement<HTMLElement>('#recorder-status');
+const stateElement =
+    getRequiredElement<HTMLElement>('#recorder-state');
 
 const durationElement =
     getRequiredElement<HTMLElement>('#recorder-duration');
 
 const errorElement =
-    getRequiredElement<HTMLElement>('#recorder-error');
+    getRequiredElement<HTMLParagraphElement>('#recorder-error');
 
 const audioElement =
     getRequiredElement<HTMLAudioElement>('#recorder-audio');
@@ -93,22 +265,22 @@ const downloadElement =
     getRequiredElement<HTMLAnchorElement>('#recorder-download');
 
 const startButton =
-    getRequiredElement<HTMLButtonElement>('#start-button');
+    getRequiredElement<HTMLButtonElement>('#recorder-start');
 
 const pauseButton =
-    getRequiredElement<HTMLButtonElement>('#pause-button');
+    getRequiredElement<HTMLButtonElement>('#recorder-pause');
 
 const resumeButton =
-    getRequiredElement<HTMLButtonElement>('#resume-button');
+    getRequiredElement<HTMLButtonElement>('#recorder-resume');
 
 const stopButton =
-    getRequiredElement<HTMLButtonElement>('#stop-button');
+    getRequiredElement<HTMLButtonElement>('#recorder-stop');
 
 const cancelButton =
-    getRequiredElement<HTMLButtonElement>('#cancel-button');
+    getRequiredElement<HTMLButtonElement>('#recorder-cancel');
 
 const resetButton =
-    getRequiredElement<HTMLButtonElement>('#reset-button');
+    getRequiredElement<HTMLButtonElement>('#recorder-reset');
 
 const recorder = createAudioRecorder({
     maxDurationMs: 120_000,
@@ -121,39 +293,42 @@ const recorder = createAudioRecorder({
     },
 });
 
+function formatDuration(durationMs: number): string {
+    const totalSeconds = Math.floor(durationMs / 1_000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 function updateUi(snapshot: RecorderSnapshot): void {
-    statusElement.textContent = snapshot.state;
+    const isIdle = snapshot.state === 'idle';
+    const isRecording = snapshot.state === 'recording';
+    const isPaused = snapshot.state === 'paused';
+    const isActive = isRecording || isPaused;
+    const canReset =
+        snapshot.recording !== null ||
+        snapshot.error !== null;
+    const canDownload = snapshot.recording !== null;
 
-    durationElement.textContent =
-        `${(snapshot.durationMs / 1_000).toFixed(1)} s`;
+    stateElement.textContent = snapshot.state;
+    durationElement.textContent = formatDuration(
+        snapshot.durationMs,
+    );
 
-    startButton.disabled = snapshot.state !== 'idle';
-
-    pauseButton.disabled =
-        snapshot.state !== 'recording';
-
-    resumeButton.disabled =
-        snapshot.state !== 'paused';
-
-    stopButton.disabled =
-        snapshot.state !== 'recording' &&
-        snapshot.state !== 'paused';
-
-    cancelButton.disabled =
-        snapshot.state !== 'recording' &&
-        snapshot.state !== 'paused';
-
-    resetButton.disabled =
-        snapshot.state !== 'completed' &&
-        snapshot.state !== 'error';
+    startButton.disabled = !isIdle;
+    pauseButton.disabled = !isRecording;
+    resumeButton.disabled = !isPaused;
+    stopButton.disabled = !isActive;
+    cancelButton.disabled = !isActive;
+    resetButton.disabled = !canReset;
 
     if (snapshot.error === null) {
         errorElement.hidden = true;
         errorElement.textContent = '';
     } else {
         errorElement.hidden = false;
-        errorElement.textContent =
-            `${snapshot.error.code}: ${snapshot.error.message}`;
+        errorElement.textContent = snapshot.error.message;
     }
 
     if (snapshot.recording === null) {
@@ -164,7 +339,9 @@ function updateUi(snapshot: RecorderSnapshot): void {
 
         downloadElement.removeAttribute('href');
         downloadElement.removeAttribute('download');
-        downloadElement.classList.add('recorder__download--disabled');
+        downloadElement.classList.add(
+            'jamit-audio-recorder__download--disabled',
+        );
         downloadElement.setAttribute('aria-disabled', 'true');
         downloadElement.tabIndex = -1;
     } else {
@@ -173,17 +350,25 @@ function updateUi(snapshot: RecorderSnapshot): void {
 
         downloadElement.href = snapshot.recording.url;
         downloadElement.download = snapshot.recording.file.name;
-        downloadElement.classList.remove('recorder__download--disabled');
-        downloadElement.removeAttribute('aria-disabled');
+        downloadElement.classList.remove(
+            'jamit-audio-recorder__download--disabled',
+        );
+        downloadElement.setAttribute('aria-disabled', 'false');
         downloadElement.tabIndex = 0;
     }
+
+    downloadElement.classList.toggle(
+        'jamit-audio-recorder__download--disabled',
+        !canDownload,
+    );
 }
 
-recorder.subscribe(updateUi);
+const unsubscribe = recorder.subscribe(updateUi);
+
 updateUi(recorder.getSnapshot());
 
 startButton.addEventListener('click', () => {
-    void recorder.start().catch(() => undefined);
+    void recorder.start();
 });
 
 pauseButton.addEventListener('click', () => {
@@ -195,7 +380,7 @@ resumeButton.addEventListener('click', () => {
 });
 
 stopButton.addEventListener('click', () => {
-    void recorder.stop().catch(() => undefined);
+    void recorder.stop();
 });
 
 cancelButton.addEventListener('click', () => {
@@ -206,6 +391,13 @@ resetButton.addEventListener('click', () => {
     recorder.reset();
 });
 
-window.addEventListener('beforeunload', () => {
-    recorder.destroy();
-});
+window.addEventListener(
+    'beforeunload',
+    () => {
+        unsubscribe();
+        recorder.destroy();
+    },
+    {
+        once: true,
+    },
+);

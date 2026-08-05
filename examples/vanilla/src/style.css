@@ -27,26 +27,6 @@ audio {
   font: inherit;
 }
 
-button {
-  min-height: 44px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 8px;
-  color: #ffffff;
-  background: #111827;
-  cursor: pointer;
-}
-
-button:hover:not(:disabled) {
-  background: #374151;
-}
-
-button:disabled {
-  color: #9ca3af;
-  background: #e5e7eb;
-  cursor: not-allowed;
-}
-
 #app {
   min-height: 100vh;
   display: grid;
@@ -54,102 +34,220 @@ button:disabled {
   padding: 24px;
 }
 
-.recorder {
+.jamit-audio-recorder {
+  --jamit-recorder-background: #ffffff;
+  --jamit-recorder-color: #111827;
+  --jamit-recorder-muted-color: #6b7280;
+  --jamit-recorder-border-color: #e5e7eb;
+  --jamit-recorder-primary: #111827;
+  --jamit-recorder-primary-hover: #374151;
+  --jamit-recorder-danger: #b91c1c;
+  --jamit-recorder-danger-hover: #991b1b;
+  --jamit-recorder-disabled-background: #e5e7eb;
+  --jamit-recorder-disabled-color: #9ca3af;
+  --jamit-recorder-error-background: #fee2e2;
+  --jamit-recorder-error-color: #991b1b;
+  --jamit-recorder-border-radius: 16px;
+  --jamit-recorder-button-radius: 8px;
+  --jamit-recorder-spacing: 24px;
+  --jamit-recorder-icon-size: 18px;
+
+  container-type: inline-size;
   width: min(100%, 720px);
-  padding: 32px;
-  border-radius: 16px;
-  background: #ffffff;
+  padding: var(--jamit-recorder-spacing);
+  border: 1px solid var(--jamit-recorder-border-color);
+  border-radius: var(--jamit-recorder-border-radius);
+  color: var(--jamit-recorder-color);
+  background: var(--jamit-recorder-background);
   box-shadow: 0 16px 40px rgb(15 23 42 / 10%);
 }
 
-.recorder h1 {
-  margin: 0 0 24px;
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+.jamit-audio-recorder__header {
+  margin-bottom: 24px;
 }
 
-.recorder p {
-  margin: 12px 0;
+.jamit-audio-recorder__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.2;
 }
 
-.recorder__status strong {
+.jamit-audio-recorder__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.jamit-audio-recorder__status,
+.jamit-audio-recorder__duration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.jamit-audio-recorder__label {
+  color: var(--jamit-recorder-muted-color);
+}
+
+.jamit-audio-recorder__state {
   text-transform: capitalize;
 }
 
-.recorder__actions {
+.jamit-audio-recorder__controls {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 24px;
 }
 
-.recorder__error {
-  margin-top: 24px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  color: #991b1b;
-  background: #fee2e2;
+.jamit-audio-recorder__button,
+.jamit-audio-recorder__download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.recorder audio {
+.jamit-audio-recorder__button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--jamit-recorder-border-color);
+  border-radius: var(--jamit-recorder-button-radius);
+  color: var(--jamit-recorder-color);
+  background: var(--jamit-recorder-background);
+  font: inherit;
+  cursor: pointer;
+  transition:
+          background-color 150ms ease,
+          border-color 150ms ease,
+          color 150ms ease,
+          transform 150ms ease;
+}
+
+.jamit-audio-recorder__icon {
+  width: var(--jamit-recorder-icon-size);
+  height: var(--jamit-recorder-icon-size);
+  flex: 0 0 auto;
+}
+
+.jamit-audio-recorder__button:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.jamit-audio-recorder__button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.jamit-audio-recorder__button:focus-visible,
+.jamit-audio-recorder__download:focus-visible {
+  outline: 3px solid rgb(59 130 246 / 35%);
+  outline-offset: 2px;
+}
+
+.jamit-audio-recorder__button--primary {
+  border-color: var(--jamit-recorder-primary);
+  color: #ffffff;
+  background: var(--jamit-recorder-primary);
+}
+
+.jamit-audio-recorder__button--primary:hover:not(:disabled) {
+  border-color: var(--jamit-recorder-primary-hover);
+  background: var(--jamit-recorder-primary-hover);
+}
+
+.jamit-audio-recorder__button--danger {
+  border-color: var(--jamit-recorder-danger);
+  color: #ffffff;
+  background: var(--jamit-recorder-danger);
+}
+
+.jamit-audio-recorder__button--danger:hover:not(:disabled) {
+  border-color: var(--jamit-recorder-danger-hover);
+  background: var(--jamit-recorder-danger-hover);
+}
+
+.jamit-audio-recorder__button:disabled {
+  border-color: var(--jamit-recorder-disabled-background);
+  color: var(--jamit-recorder-disabled-color);
+  background: var(--jamit-recorder-disabled-background);
+  cursor: not-allowed;
+}
+
+.jamit-audio-recorder__error {
+  margin: 24px 0 0;
+  padding: 12px 16px;
+  border-radius: var(--jamit-recorder-button-radius);
+  color: var(--jamit-recorder-error-color);
+  background: var(--jamit-recorder-error-background);
+}
+
+.jamit-audio-recorder__player {
   width: 100%;
   margin-top: 24px;
 }
 
-.recorder__download {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.jamit-audio-recorder__download {
   min-height: 44px;
   margin-top: 16px;
   padding: 0 18px;
-  border-radius: 8px;
+  border-radius: var(--jamit-recorder-button-radius);
   color: #ffffff;
-  background: #111827;
+  background: var(--jamit-recorder-primary);
   text-decoration: none;
+  transition:
+          background-color 150ms ease,
+          color 150ms ease;
 }
 
-.recorder__download:hover {
-  background: #374151;
+.jamit-audio-recorder__download:hover {
+  background: var(--jamit-recorder-primary-hover);
 }
 
-.recorder__download--disabled,
-.recorder__download--disabled:hover {
-  color: #9ca3af;
-  background: #e5e7eb;
+.jamit-audio-recorder__download--disabled,
+.jamit-audio-recorder__download--disabled:hover {
+  color: var(--jamit-recorder-disabled-color);
+  background: var(--jamit-recorder-disabled-background);
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.recorder__footer {
+.jamit-audio-recorder__footer {
   margin-top: 32px;
   padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-  color: #6b7280;
+  border-top: 1px solid var(--jamit-recorder-border-color);
+  color: var(--jamit-recorder-muted-color);
   font-size: 0.875rem;
   text-align: center;
 }
 
-.recorder__footer a {
-  color: #111827;
+.jamit-audio-recorder__footer a {
+  color: var(--jamit-recorder-color);
   font-weight: 600;
   text-decoration: none;
 }
 
-.recorder__footer a:hover {
+.jamit-audio-recorder__footer a:hover {
   text-decoration: underline;
 }
 
-@media (max-width: 560px) {
-  .recorder {
-    padding: 24px;
+@container (max-width: 560px) {
+  .jamit-audio-recorder {
+    padding: 20px;
   }
 
-  .recorder__actions {
+  .jamit-audio-recorder__meta {
+    display: grid;
+    gap: 10px;
+  }
+
+  .jamit-audio-recorder__controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
 
-  .recorder__actions button {
+  .jamit-audio-recorder__button,
+  .jamit-audio-recorder__download {
     width: 100%;
   }
 }
