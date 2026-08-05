@@ -1,6 +1,6 @@
 {
   "name": "@codeplayer71/audio-recorder-vue",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Fully typed Vue audio recorder composable and ready-to-use recorder component based on the MediaRecorder API.",
   "keywords": [
     "audio",
