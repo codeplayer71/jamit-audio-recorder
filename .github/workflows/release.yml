@@ -32,7 +32,17 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build workspace packages
+        run: |
+         pnpm --filter @jamit/audio-recorder-core build
+         pnpm --filter @jamit/audio-recorder-vue build
+         pnpm --filter @jamit/audio-recorder-react build
+         pnpm --filter @jamit/audio-recorder-nuxt build
+
+      - name: Prepare Nuxt example
+        run: pnpm --filter @jamit/audio-recorder-example-nuxt exec nuxt prepare
 
       - name: Typecheck
         run: pnpm typecheck
