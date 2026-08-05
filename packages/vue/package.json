@@ -1,0 +1,71 @@
+{
+  "name": "@jamit/audio-recorder-vue",
+  "version": "0.0.0",
+  "description": "Fully typed Vue audio recorder composable and ready-to-use recorder component based on the MediaRecorder API.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "composition-api",
+    "composable",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "recording",
+    "typescript",
+    "vue",
+    "vue3"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/style.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@jamit/audio-recorder-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@testing-library/vue": "^8.1.0",
+    "@vitejs/plugin-vue": "6.0.8",
+    "jsdom": "^26.1.0",
+    "vite": "7.3.6",
+    "vitest": "^3.2.4",
+    "vue": "^3.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

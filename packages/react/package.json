@@ -1,18 +1,19 @@
 {
-  "name": "@jamit/audio-recorder-core",
+  "name": "@jamit/audio-recorder-react",
   "version": "0.0.0",
-  "description": "Framework-independent and fully typed browser audio recording core based on the MediaRecorder API.",
+  "description": "Fully typed React audio recorder hook and ready-to-use recorder component based on the MediaRecorder API.",
   "keywords": [
     "audio",
     "audio-recorder",
-    "browser",
+    "hook",
     "media-recorder",
     "mediarecorder",
     "microphone",
+    "react",
+    "react-hook",
     "recording",
     "typescript",
-    "vanilla-javascript",
-    "web-audio"
+    "voice-recorder"
   ],
   "author": {
     "name": "Jasminko Milicevic",
@@ -23,29 +24,45 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
-    "directory": "packages/core"
+    "directory": "packages/react"
   },
   "bugs": {
     "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
   },
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
+  "style": "./dist/style.css",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
-    }
+    },
+    "./style.css": "./dist/style.css"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsdown",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@jamit/audio-recorder-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.0.0",
+    "jsdom": "^26.1.0",
+    "react": "^19.0.0",
+    "vitest": "^3.2.4"
   },
   "publishConfig": {
     "access": "public"

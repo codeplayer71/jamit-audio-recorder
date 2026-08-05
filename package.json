@@ -2,7 +2,33 @@
   "name": "jamit-audio-recorder",
   "version": "0.0.0",
   "private": true,
-  "description": "Reliable browser audio recording for Vue, Nuxt, React and TypeScript, powered by one shared framework-independent core.",
+  "description": "Reliable and fully typed browser audio recording for Vue, Nuxt, React and Vanilla TypeScript, powered by a shared framework-independent core.",
+  "keywords": [
+    "audio",
+    "audio-recorder",
+    "media-recorder",
+    "mediarecorder",
+    "microphone",
+    "nuxt",
+    "react",
+    "recording",
+    "typescript",
+    "vue",
+    "voice-recorder"
+  ],
+  "author": {
+    "name": "Jasminko Milicevic",
+    "url": "https://jamit.one"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/codeplayer71/jamit-audio-recorder#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@10.18.1",
   "engines": {
@@ -10,13 +36,24 @@
     "pnpm": ">=10"
   },
   "scripts": {
+    "build": "pnpm --recursive build",
     "test": "pnpm --recursive test",
+    "test:core-import": "pnpm build && node scripts/test-core-import.mjs",
     "typecheck": "pnpm --recursive typecheck",
-    "check": "pnpm typecheck && pnpm test"
+    "check": "pnpm typecheck && pnpm test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
+    "@jamit/audio-recorder-core": "workspace:*",
+    "@tsdown/css": "^0.22.14",
     "@types/node": "^26.1.2",
-    "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "tsdown": "^0.22.14",
+    "typescript": "^5.9.3",
+    "unplugin-vue": "^7.2.0",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.9"
   }
 }

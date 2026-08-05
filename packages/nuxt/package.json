@@ -1,18 +1,19 @@
 {
-  "name": "@jamit/audio-recorder-core",
+  "name": "@jamit/audio-recorder-nuxt",
   "version": "0.0.0",
-  "description": "Framework-independent and fully typed browser audio recording core based on the MediaRecorder API.",
+  "description": "Nuxt module for automatic audio recorder composable imports, component registration and default styles.",
   "keywords": [
     "audio",
     "audio-recorder",
-    "browser",
     "media-recorder",
     "mediarecorder",
     "microphone",
+    "nuxt",
+    "nuxt-module",
     "recording",
     "typescript",
-    "vanilla-javascript",
-    "web-audio"
+    "vue",
+    "voice-recorder"
   ],
   "author": {
     "name": "Jasminko Milicevic",
@@ -23,29 +24,39 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/codeplayer71/jamit-audio-recorder.git",
-    "directory": "packages/core"
+    "directory": "packages/nuxt"
   },
   "bugs": {
     "url": "https://github.com/codeplayer71/jamit-audio-recorder/issues"
   },
   "type": "module",
   "sideEffects": false,
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "main": "./dist/module.mjs",
+  "types": "./dist/types.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "build": "nuxt-module-build build",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jamit/audio-recorder-vue": "workspace:*"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.0.0"
+  },
+  "devDependencies": {
+    "@nuxt/kit": "^4.0.0",
+    "@nuxt/module-builder": "^1.0.0",
+    "@nuxt/schema": "^4.0.0",
+    "nuxt": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"
