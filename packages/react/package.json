@@ -1,6 +1,6 @@
 {
   "name": "@jamit/audio-recorder-react",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Fully typed React audio recorder hook and ready-to-use recorder component based on the MediaRecorder API.",
   "keywords": [
     "audio",
