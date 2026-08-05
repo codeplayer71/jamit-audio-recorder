@@ -1,27 +1,27 @@
-# @jamit/audio-recorder-vue
+# @codeplayer71/audio-recorder-vue
 
 Fully typed Vue audio recorder composable and ready-to-use recorder component based on the MediaRecorder API.
 
 ## Installation
 
 ```bash
-pnpm add @jamit/audio-recorder-vue
+pnpm add @codeplayer71/audio-recorder-vue
 ```
 
 ```bash
-npm install @jamit/audio-recorder-vue
+npm install @codeplayer71/audio-recorder-vue
 ```
 
 ```bash
-yarn add @jamit/audio-recorder-vue
+yarn add @codeplayer71/audio-recorder-vue
 ```
 
 ## Ready-to-use component
 
 ```vue
 <script setup lang="ts">
-import { JamItAudioRecorder } from '@jamit/audio-recorder-vue';
-import '@jamit/audio-recorder-vue/style.css';
+import { JamItAudioRecorder } from '@codeplayer71/audio-recorder-vue';
+import '@codeplayer71/audio-recorder-vue/style.css';
 </script>
 
 <template>
@@ -33,7 +33,7 @@ import '@jamit/audio-recorder-vue/style.css';
 
 ```vue
 <script setup lang="ts">
-import { useAudioRecorder } from '@jamit/audio-recorder-vue';
+import { useAudioRecorder } from '@codeplayer71/audio-recorder-vue';
 
 const {
   snapshot,

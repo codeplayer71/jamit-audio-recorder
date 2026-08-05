@@ -1,25 +1,25 @@
-# @jamit/audio-recorder-core
+# @codeplayer71/audio-recorder-core
 
 Framework-independent and fully typed browser audio recording core based on the MediaRecorder API.
 
 ## Installation
 
 ```bash
-pnpm add @jamit/audio-recorder-core
+pnpm add @codeplayer71/audio-recorder-core
 ```
 
 ```bash
-npm install @jamit/audio-recorder-core
+npm install @codeplayer71/audio-recorder-core
 ```
 
 ```bash
-yarn add @jamit/audio-recorder-core
+yarn add @codeplayer71/audio-recorder-core
 ```
 
 ## Usage
 
 ```ts
-import { createAudioRecorder } from '@jamit/audio-recorder-core';
+import { createAudioRecorder } from '@codeplayer71/audio-recorder-core';
 
 const recorder = createAudioRecorder({
   maxDurationMs: 120_000,

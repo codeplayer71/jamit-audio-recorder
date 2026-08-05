@@ -2,7 +2,7 @@ import type {
     AudioRecording,
     AudioRecorderError,
     RecorderSnapshot,
-} from '@jamit/audio-recorder-core';
+} from '@codeplayer71/audio-recorder-core';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import {

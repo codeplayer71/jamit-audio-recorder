@@ -1,5 +1,5 @@
 {
-  "name": "@jamit/audio-recorder-example-vanilla",
+  "name": "@codeplayer71/audio-recorder-example-vanilla",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,6 +13,6 @@
     "vite": "^8.2.0"
   },
   "dependencies": {
-    "@jamit/audio-recorder-core": "workspace:*"
+    "@codeplayer71/audio-recorder-core": "workspace:*"
   }
 }

@@ -1,6 +1,6 @@
 {
-  "name": "@jamit/audio-recorder-react",
-  "version": "1.0.0",
+  "name": "@codeplayer71/audio-recorder-react",
+  "version": "0.0.0",
   "description": "Fully typed React audio recorder hook and ready-to-use recorder component based on the MediaRecorder API.",
   "keywords": [
     "audio",
@@ -52,7 +52,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@jamit/audio-recorder-core": "workspace:*"
+    "@codeplayer71/audio-recorder-core": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0"

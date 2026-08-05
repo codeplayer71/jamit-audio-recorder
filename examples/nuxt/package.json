@@ -1,5 +1,5 @@
 {
-  "name": "@jamit/audio-recorder-example-nuxt",
+  "name": "@codeplayer71/audio-recorder-example-nuxt",
   "private": true,
   "scripts": {
     "build": "nuxt build",
@@ -9,7 +9,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@jamit/audio-recorder-nuxt": "workspace:*",
+    "@codeplayer71/audio-recorder-nuxt": "workspace:*",
     "nuxt": "^4.5.1",
     "vue": "^3.5.40",
     "vue-router": "^5.2.0"

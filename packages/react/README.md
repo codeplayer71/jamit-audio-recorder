@@ -1,26 +1,26 @@
-# @jamit/audio-recorder-react
+# @codeplayer71/audio-recorder-react
 
 Fully typed React audio recorder hook and ready-to-use recorder component based on the MediaRecorder API.
 
 ## Installation
 
 ```bash
-pnpm add @jamit/audio-recorder-react
+pnpm add @codeplayer71/audio-recorder-react
 ```
 
 ```bash
-npm install @jamit/audio-recorder-react
+npm install @codeplayer71/audio-recorder-react
 ```
 
 ```bash
-yarn add @jamit/audio-recorder-react
+yarn add @codeplayer71/audio-recorder-react
 ```
 
 ## Ready-to-use component
 
 ```tsx
-import { JamItAudioRecorder } from '@jamit/audio-recorder-react';
-import '@jamit/audio-recorder-react/style.css';
+import { JamItAudioRecorder } from '@codeplayer71/audio-recorder-react';
+import '@codeplayer71/audio-recorder-react/style.css';
 
 export function Recorder() {
   return <JamItAudioRecorder />;
@@ -30,7 +30,7 @@ export function Recorder() {
 ## Headless hook
 
 ```tsx
-import { useAudioRecorder } from '@jamit/audio-recorder-react';
+import { useAudioRecorder } from '@codeplayer71/audio-recorder-react';
 
 export function Recorder() {
   const {

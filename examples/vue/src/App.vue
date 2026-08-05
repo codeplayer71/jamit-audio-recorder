@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { JamItAudioRecorder } from '@jamit/audio-recorder-vue';
+import { JamItAudioRecorder } from '@codeplayer71/audio-recorder-vue';
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 import {
     createAudioRecorder,
     type RecorderSnapshot,
-} from '@jamit/audio-recorder-core';
+} from '@codeplayer71/audio-recorder-core';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app');

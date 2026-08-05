@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",
-    "@jamit/audio-recorder-core": "workspace:*",
+    "@codeplayer71/audio-recorder-core": "workspace:*",
     "@tsdown/css": "^0.22.14",
     "@types/node": "^26.1.2",
     "tsdown": "^0.22.14",

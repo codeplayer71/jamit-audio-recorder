@@ -1,5 +1,5 @@
 {
-  "name": "@jamit/audio-recorder-example-vue",
+  "name": "@codeplayer71/audio-recorder-example-vue",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@jamit/audio-recorder-core": "workspace:*",
-    "@jamit/audio-recorder-vue": "workspace:*",
+    "@codeplayer71/audio-recorder-core": "workspace:*",
+    "@codeplayer71/audio-recorder-vue": "workspace:*",
     "vue": "^3.5.40"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { JamItAudioRecorder } from '@jamit/audio-recorder-react';
+import { JamItAudioRecorder } from '@codeplayer71/audio-recorder-react';
 
 function App() {
     return (

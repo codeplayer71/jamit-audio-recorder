@@ -4,10 +4,10 @@ A modern, framework-friendly audio recording library for Vanilla TypeScript, Vue
 
 ## Packages
 
-- `@jamit/audio-recorder-core`
-- `@jamit/audio-recorder-vue`
-- `@jamit/audio-recorder-react`
-- `@jamit/audio-recorder-nuxt`
+- `@codeplayer71/audio-recorder-core`
+- `@codeplayer71/audio-recorder-vue`
+- `@codeplayer71/audio-recorder-react`
+- `@codeplayer71/audio-recorder-nuxt`
 
 ## Features
 
@@ -36,25 +36,25 @@ Install only the package required by your application.
 ### Core
 
 ```bash
-pnpm add @jamit/audio-recorder-core
+pnpm add @codeplayer71/audio-recorder-core
 ```
 
 ### Vue
 
 ```bash
-pnpm add @jamit/audio-recorder-vue
+pnpm add @codeplayer71/audio-recorder-vue
 ```
 
 ### React
 
 ```bash
-pnpm add @jamit/audio-recorder-react
+pnpm add @codeplayer71/audio-recorder-react
 ```
 
 ### Nuxt
 
 ```bash
-pnpm add @jamit/audio-recorder-nuxt
+pnpm add @codeplayer71/audio-recorder-nuxt
 ```
 
 > The packages are not publicly available yet. These installation commands will work after the first public release.
@@ -64,7 +64,7 @@ pnpm add @jamit/audio-recorder-nuxt
 The framework-independent core can be used directly in any browser application.
 
 ```ts
-import { createAudioRecorder } from '@jamit/audio-recorder-core';
+import { createAudioRecorder } from '@codeplayer71/audio-recorder-core';
 
 const recorder = createAudioRecorder({
   maxDurationMs: 120_000,
@@ -106,8 +106,8 @@ Import the component and its styles:
 
 ```vue
 <script setup lang="ts">
-import { JamItAudioRecorder } from '@jamit/audio-recorder-vue';
-import '@jamit/audio-recorder-vue/style.css';
+import { JamItAudioRecorder } from '@codeplayer71/audio-recorder-vue';
+import '@codeplayer71/audio-recorder-vue/style.css';
 </script>
 
 <template>
@@ -121,7 +121,7 @@ Use the composable when you want to build a completely custom interface:
 
 ```vue
 <script setup lang="ts">
-import { useAudioRecorder } from '@jamit/audio-recorder-vue';
+import { useAudioRecorder } from '@codeplayer71/audio-recorder-vue';
 
 const {
   snapshot,
@@ -196,8 +196,8 @@ Import the component and its styles:
 ```tsx
 import {
   JamItAudioRecorder,
-} from '@jamit/audio-recorder-react';
-import '@jamit/audio-recorder-react/style.css';
+} from '@codeplayer71/audio-recorder-react';
+import '@codeplayer71/audio-recorder-react/style.css';
 
 export function Recorder() {
   return <JamItAudioRecorder />;
@@ -211,7 +211,7 @@ Use the hook when you want full control over the interface:
 ```tsx
 import {
   useAudioRecorder,
-} from '@jamit/audio-recorder-react';
+} from '@codeplayer71/audio-recorder-react';
 
 export function Recorder() {
   const {
@@ -284,7 +284,7 @@ Register the module in `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['@jamit/audio-recorder-nuxt'],
+  modules: ['@codeplayer71/audio-recorder-nuxt'],
 });
 ```
 

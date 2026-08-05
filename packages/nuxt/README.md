@@ -1,19 +1,19 @@
-# @jamit/audio-recorder-nuxt
+# @codeplayer71/audio-recorder-nuxt
 
 Nuxt module for automatic audio recorder composable imports, component registration and default styles.
 
 ## Installation
 
 ```bash
-pnpm add @jamit/audio-recorder-nuxt
+pnpm add @codeplayer71/audio-recorder-nuxt
 ```
 
 ```bash
-npm install @jamit/audio-recorder-nuxt
+npm install @codeplayer71/audio-recorder-nuxt
 ```
 
 ```bash
-yarn add @jamit/audio-recorder-nuxt
+yarn add @codeplayer71/audio-recorder-nuxt
 ```
 
 ## Setup
@@ -22,7 +22,7 @@ Register the module in `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['@jamit/audio-recorder-nuxt'],
+  modules: ['@codeplayer71/audio-recorder-nuxt'],
 });
 ```
 
@@ -94,7 +94,7 @@ const {
 
 ## Customization
 
-The automatically registered component supports the same props, slots and CSS variables as `@jamit/audio-recorder-vue`.
+The automatically registered component supports the same props, slots and CSS variables as `@codeplayer71/audio-recorder-vue`.
 
 ```vue
 <JamItAudioRecorder
