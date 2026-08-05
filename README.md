@@ -1,23 +1,619 @@
 # JamIT Audio Recorder
 
-Reliable browser audio recording for Vue, Nuxt, React and TypeScript, powered by one shared framework-independent core.
+A modern, framework-friendly audio recording library for Vanilla TypeScript, Vue, Nuxt and React.
 
-## Status
+## Packages
 
-This project is currently under active development.
+- `@jamit/audio-recorder-core`
+- `@jamit/audio-recorder-vue`
+- `@jamit/audio-recorder-react`
+- `@jamit/audio-recorder-nuxt`
 
-JamIT Audio Recorder is a complete new implementation and does not reuse or migrate the codebase of the previous npm package.
+## Features
 
-## Planned support
+- Start, pause, resume, stop, cancel and reset recordings
+- Framework-independent TypeScript core
+- Typed Vue composable and React hook
+- Ready-to-use Vue and React recorder components
+- Nuxt module with automatic imports and component registration
+- Maximum duration and file-size limits
+- Browser-aware MIME-type detection
+- Playback and download support
+- Customizable styles through CSS variables
+- Slots for Vue and render props for React
+- Automatic resource cleanup
 
-- TypeScript
-- Vanilla JavaScript
-- Vue 3
-- Nuxt 3 and Nuxt 4
-- React
+## Project status
 
-## Architecture
+The recording core, framework integrations, ready-to-use components and example applications are functional.
 
-The recording functionality is implemented once in a framework-independent TypeScript core.
+The project is currently being prepared for its first public release. Package metadata, documentation, browser validation and publishing workflows are still being finalized.
 
-Vue, Nuxt and React use thin framework adapters built on top of the shared core.
+## Installation
+
+Install only the package required by your application.
+
+### Core
+
+```bash
+pnpm add @jamit/audio-recorder-core
+```
+
+### Vue
+
+```bash
+pnpm add @jamit/audio-recorder-vue
+```
+
+### React
+
+```bash
+pnpm add @jamit/audio-recorder-react
+```
+
+### Nuxt
+
+```bash
+pnpm add @jamit/audio-recorder-nuxt
+```
+
+> The packages are not publicly available yet. These installation commands will work after the first public release.
+
+## Core
+
+The framework-independent core can be used directly in any browser application.
+
+```ts
+import { createAudioRecorder } from '@jamit/audio-recorder-core';
+
+const recorder = createAudioRecorder({
+  maxDurationMs: 120_000,
+  maxFileSizeBytes: 10_000_000,
+  audioConstraints: {
+    channelCount: 1,
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  },
+});
+
+const unsubscribe = recorder.subscribe((snapshot) => {
+  console.log(snapshot.state);
+  console.log(snapshot.durationMs);
+  console.log(snapshot.recording);
+  console.log(snapshot.error);
+});
+
+await recorder.start();
+
+recorder.pause();
+recorder.resume();
+
+const recording = await recorder.stop();
+
+console.log(recording.file);
+console.log(recording.url);
+
+unsubscribe();
+recorder.destroy();
+```
+
+## Vue
+
+### Ready-to-use component
+
+Import the component and its styles:
+
+```vue
+<script setup lang="ts">
+import { JamItAudioRecorder } from '@jamit/audio-recorder-vue';
+import '@jamit/audio-recorder-vue/style.css';
+</script>
+
+<template>
+  <JamItAudioRecorder />
+</template>
+```
+
+### Headless composable
+
+Use the composable when you want to build a completely custom interface:
+
+```vue
+<script setup lang="ts">
+import { useAudioRecorder } from '@jamit/audio-recorder-vue';
+
+const {
+  snapshot,
+  start,
+  pause,
+  resume,
+  stop,
+  cancel,
+  reset,
+} = useAudioRecorder({
+  maxDurationMs: 120_000,
+  maxFileSizeBytes: 10_000_000,
+});
+</script>
+
+<template>
+  <div>
+    <p>Status: {{ snapshot.state }}</p>
+    <p>Duration: {{ snapshot.durationMs }} ms</p>
+
+    <button
+      type="button"
+      @click="start"
+    >
+      Start
+    </button>
+
+    <button
+      type="button"
+      @click="pause"
+    >
+      Pause
+    </button>
+
+    <button
+      type="button"
+      @click="resume"
+    >
+      Resume
+    </button>
+
+    <button
+      type="button"
+      @click="stop"
+    >
+      Stop
+    </button>
+
+    <button
+      type="button"
+      @click="cancel"
+    >
+      Cancel
+    </button>
+
+    <button
+      type="button"
+      @click="reset"
+    >
+      Reset
+    </button>
+  </div>
+</template>
+```
+
+## React
+
+### Ready-to-use component
+
+Import the component and its styles:
+
+```tsx
+import {
+  JamItAudioRecorder,
+} from '@jamit/audio-recorder-react';
+import '@jamit/audio-recorder-react/style.css';
+
+export function Recorder() {
+  return <JamItAudioRecorder />;
+}
+```
+
+### Headless hook
+
+Use the hook when you want full control over the interface:
+
+```tsx
+import {
+  useAudioRecorder,
+} from '@jamit/audio-recorder-react';
+
+export function Recorder() {
+  const {
+    snapshot,
+    start,
+    pause,
+    resume,
+    stop,
+    cancel,
+    reset,
+  } = useAudioRecorder({
+    maxDurationMs: 120_000,
+    maxFileSizeBytes: 10_000_000,
+  });
+
+  return (
+    <div>
+      <p>Status: {snapshot.state}</p>
+      <p>Duration: {snapshot.durationMs} ms</p>
+
+      <button
+        type="button"
+        onClick={() => void start()}
+      >
+        Start
+      </button>
+
+      <button
+        type="button"
+        onClick={pause}
+      >
+        Pause
+      </button>
+
+      <button
+        type="button"
+        onClick={resume}
+      >
+        Resume
+      </button>
+
+      <button
+        type="button"
+        onClick={() => void stop()}
+      >
+        Stop
+      </button>
+
+      <button
+        type="button"
+        onClick={cancel}
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        onClick={reset}
+      >
+        Reset
+      </button>
+    </div>
+  );
+}
+```
+
+## Nuxt
+
+Register the module in `nuxt.config.ts`:
+
+```ts
+export default defineNuxtConfig({
+  modules: ['@jamit/audio-recorder-nuxt'],
+});
+```
+
+The module automatically provides:
+
+- `useAudioRecorder()`
+- `<JamItAudioRecorder />`
+- the default component styles
+
+The component can be used without a manual import:
+
+```vue
+<template>
+  <JamItAudioRecorder />
+</template>
+```
+
+The composable is also automatically available:
+
+```vue
+<script setup lang="ts">
+const {
+  snapshot,
+  start,
+  pause,
+  resume,
+  stop,
+  cancel,
+  reset,
+} = useAudioRecorder();
+</script>
+```
+
+## Component customization
+
+The ready-to-use Vue and React components provide a professional default interface while remaining customizable.
+
+### Labels and visible sections
+
+```vue
+<JamItAudioRecorder
+  title="Record a voice message"
+  start-label="Start"
+  stop-label="Finish"
+  download-label="Save recording"
+  :max-duration-ms="60_000"
+  :max-file-size-bytes="5_000_000"
+  :show-cancel="false"
+/>
+```
+
+Available display options include:
+
+- `showTitle`
+- `showStatus`
+- `showDuration`
+- `showPlayer`
+- `showDownload`
+- `showCancel`
+- `showReset`
+
+### CSS variables
+
+The default design can be customized without replacing the component structure:
+
+```css
+.custom-recorder {
+  --jamit-recorder-background: #0f172a;
+  --jamit-recorder-color: #ffffff;
+  --jamit-recorder-muted-color: #94a3b8;
+  --jamit-recorder-border-color: #334155;
+  --jamit-recorder-primary: #2dd4bf;
+  --jamit-recorder-primary-hover: #14b8a6;
+  --jamit-recorder-danger: #ef4444;
+  --jamit-recorder-danger-hover: #dc2626;
+  --jamit-recorder-border-radius: 20px;
+  --jamit-recorder-button-radius: 10px;
+  --jamit-recorder-spacing: 28px;
+  --jamit-recorder-icon-size: 20px;
+}
+```
+
+Vue:
+
+```vue
+<JamItAudioRecorder class="custom-recorder" />
+```
+
+React:
+
+```tsx
+<JamItAudioRecorder className="custom-recorder" />
+```
+
+## Vue slots
+
+Individual areas of the Vue component can be replaced through named slots.
+
+```vue
+<JamItAudioRecorder>
+  <template #header>
+    <h2>Voice message</h2>
+  </template>
+
+  <template
+    #controls="{
+      start,
+      stop,
+      isRecording,
+    }"
+  >
+    <button
+      v-if="!isRecording"
+      type="button"
+      @click="start"
+    >
+      Record
+    </button>
+
+    <button
+      v-else
+      type="button"
+      @click="stop"
+    >
+      Finish
+    </button>
+  </template>
+</JamItAudioRecorder>
+```
+
+Available slots:
+
+- `header`
+- `status`
+- `duration`
+- `controls`
+- `error`
+- `player`
+- `download`
+- `footer`
+
+## React render props
+
+Individual areas of the React component can be replaced through render props.
+
+```tsx
+<JamItAudioRecorder
+  renderHeader={() => (
+    <h2>Voice message</h2>
+  )}
+  renderControls={({
+    start,
+    stop,
+    isRecording,
+  }) => (
+    <div>
+      {!isRecording ? (
+        <button
+          type="button"
+          onClick={() => void start()}
+        >
+          Record
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => void stop()}
+        >
+          Finish
+        </button>
+      )}
+    </div>
+  )}
+/>
+```
+
+Available render props:
+
+- `renderHeader`
+- `renderStatus`
+- `renderDuration`
+- `renderControls`
+- `renderError`
+- `renderPlayer`
+- `renderDownload`
+- `renderFooter`
+
+## Recorder options
+
+The recorder accepts configuration options such as:
+
+```ts
+{
+  maxDurationMs: 120_000,
+  maxFileSizeBytes: 10_000_000,
+  audioConstraints: {
+    channelCount: 1,
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  },
+}
+```
+
+### `maxDurationMs`
+
+Maximum recording duration in milliseconds.
+
+### `maxFileSizeBytes`
+
+Maximum recording size in bytes.
+
+### `audioConstraints`
+
+Browser media constraints passed to the microphone request.
+
+## Recorder state
+
+The recorder snapshot contains:
+
+```ts
+type RecorderSnapshot = {
+  state: RecorderState;
+  durationMs: number;
+  recording: AudioRecording | null;
+  error: AudioRecorderError | null;
+};
+```
+
+The recorder state can include values such as:
+
+```text
+idle
+recording
+paused
+completed
+error
+```
+
+## Recording result
+
+A completed recording contains:
+
+```ts
+type AudioRecording = {
+  blob: Blob;
+  file: File;
+  url: string;
+  durationMs: number;
+  mimeType: string;
+  extension: string;
+  sizeBytes: number;
+  createdAt: Date;
+};
+```
+
+The object URL can be used for immediate playback, while the file can be uploaded or downloaded.
+
+## Browser formats
+
+Audio recording is based on the browser `MediaRecorder` API.
+
+The resulting format depends on the MIME types supported by the current browser. Chromium-based browsers commonly create:
+
+```text
+audio/webm;codecs=opus
+```
+
+Other browsers may use formats such as:
+
+```text
+audio/mp4
+audio/ogg
+audio/webm
+```
+
+The library detects the actual MIME type and assigns the matching file extension. It does not simply rename the recorded file.
+
+## Resource cleanup
+
+The library automatically cleans up:
+
+- microphone media streams
+- duration timers
+- object URLs
+- state subscriptions
+- framework lifecycle resources
+
+The Vue integration cleans up when its effect scope is disposed.
+
+The React integration also handles development behavior in React Strict Mode.
+
+## Development
+
+Install workspace dependencies:
+
+```bash
+pnpm install
+```
+
+Run all tests:
+
+```bash
+pnpm test
+```
+
+Run all type checks:
+
+```bash
+pnpm typecheck
+```
+
+Build all packages and examples:
+
+```bash
+pnpm build
+```
+
+Run an individual example:
+
+```bash
+pnpm --filter vanilla dev
+pnpm --filter vue dev
+pnpm --filter react dev
+pnpm --filter nuxt dev
+```
+
+## Repository
+
+Source code and development progress:
+
+https://github.com/codeplayer71/jamit-audio-recorder
