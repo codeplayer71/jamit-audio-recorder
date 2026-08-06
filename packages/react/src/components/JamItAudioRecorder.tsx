@@ -20,6 +20,7 @@ type RecorderActions = Pick<
 
 export type JamItAudioRecorderRenderState = {
     snapshot: RecorderSnapshot;
+    audioLevel: number;
     formattedDuration: string;
     isIdle: boolean;
     isRecording: boolean;
@@ -48,6 +49,7 @@ export type JamItAudioRecorderProps = {
     showTitle?: boolean;
     showStatus?: boolean;
     showDuration?: boolean;
+    showAudioLevel?: boolean;
     showPlayer?: boolean;
     showDownload?: boolean;
     showCancel?: boolean;
@@ -60,6 +62,9 @@ export type JamItAudioRecorderProps = {
         state: JamItAudioRecorderRenderState,
     ) => ReactNode;
     renderDuration?: (
+        state: JamItAudioRecorderRenderState,
+    ) => ReactNode;
+    renderAudioLevel?: (
         state: JamItAudioRecorderRenderState,
     ) => ReactNode;
     renderControls?: (
@@ -102,6 +107,7 @@ export function JamItAudioRecorder({
                                        showStatus = true,
                                        showDuration = true,
                                        showPlayer = true,
+                                       showAudioLevel = true,
                                        showDownload = true,
                                        showCancel = true,
                                        showReset = true,
@@ -109,6 +115,7 @@ export function JamItAudioRecorder({
                                        renderHeader,
                                        renderStatus,
                                        renderDuration,
+                                       renderAudioLevel,
                                        renderControls,
                                        renderError,
                                        renderPlayer,
@@ -117,6 +124,7 @@ export function JamItAudioRecorder({
                                    }: JamItAudioRecorderProps) {
     const {
         snapshot,
+        audioLevel,
         start,
         pause,
         resume,
@@ -141,6 +149,8 @@ export function JamItAudioRecorder({
     const isRecording = snapshot.state === 'recording';
     const isPaused = snapshot.state === 'paused';
     const isActive = isRecording || isPaused;
+    const isAudioLevelVisible =
+        showAudioLevel && isActive;
     const canReset =
         snapshot.recording !== null ||
         snapshot.error !== null;
@@ -148,6 +158,7 @@ export function JamItAudioRecorder({
 
     const renderState: JamItAudioRecorderRenderState = {
         snapshot,
+        audioLevel,
         formattedDuration,
         isIdle,
         isRecording,
@@ -211,6 +222,26 @@ export function JamItAudioRecorder({
                     </p>
                 )}
             </div>
+
+            {renderAudioLevel
+                ? renderAudioLevel(renderState)
+                : isAudioLevelVisible && (
+                <div
+                    className="jamit-audio-recorder__audio-level"
+                    role="meter"
+                    aria-label="Audio input level"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(audioLevel * 100)}
+                >
+                    <div
+                        className="jamit-audio-recorder__audio-level-value"
+                        style={{
+                            transform: `scaleX(${audioLevel})`,
+                        }}
+                    />
+                </div>
+            )}
 
             {renderControls
                 ? renderControls(renderState)

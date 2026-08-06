@@ -23,7 +23,9 @@ const recorderMock = vi.hoisted(() => ({
         durationMs: 0,
         recording: null,
         error: null,
+        audioLevel: 0,
     } as RecorderSnapshot,
+    audioLevel: 0,
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
@@ -50,6 +52,7 @@ describe('JamItAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0
         };
     });
 
@@ -159,6 +162,7 @@ describe('JamItAudioRecorder', () => {
             durationMs: 1_000,
             recording: null,
             error: null,
+            audioLevel: 0,
         };
 
         render(<JamItAudioRecorder />);
@@ -209,6 +213,7 @@ describe('JamItAudioRecorder', () => {
                 createdAt: new Date('2026-08-05T06:00:00.000Z'),
             },
             error: null,
+            audioLevel: 0,
         };
 
         render(<JamItAudioRecorder />);
@@ -262,6 +267,7 @@ describe('JamItAudioRecorder', () => {
                 code: 'permission-denied',
                 message: 'Microphone permission was denied.',
             },
+            audioLevel: 0,
         };
 
         render(<JamItAudioRecorder />);
@@ -299,6 +305,7 @@ describe('JamItAudioRecorder', () => {
                 createdAt: new Date('2026-08-05T06:00:00.000Z'),
             },
             error: null,
+            audioLevel: 0,
         };
 
         render(<JamItAudioRecorder />);
@@ -331,5 +338,127 @@ describe('JamItAudioRecorder', () => {
             maxFileSizeBytes: 2_000_000,
             audioConstraints,
         });
+    });
+
+    it('renders the current audio level while recording', () => {
+        recorderMock.snapshot = {
+            state: 'recording',
+            durationMs: 1_000,
+            recording: null,
+            error: null,
+            audioLevel: 0.42,
+        };
+
+        recorderMock.audioLevel = 0.42;
+
+        render(<JamItAudioRecorder />);
+
+        const meter = screen.getByRole('meter', {
+            name: 'Audio input level',
+        });
+
+        expect(meter.getAttribute('aria-valuemin')).toBe('0');
+        expect(meter.getAttribute('aria-valuemax')).toBe('100');
+        expect(meter.getAttribute('aria-valuenow')).toBe('42');
+
+        const levelValue = meter.querySelector(
+            '.jamit-audio-recorder__audio-level-value',
+        );
+
+        if (levelValue === null) {
+            throw new Error('Audio level value was not rendered.');
+        }
+
+        expect(
+            (levelValue as HTMLElement).style.transform,
+        ).toBe('scaleX(0.42)');
+    });
+
+    it('hides the audio level when disabled', () => {
+        recorderMock.snapshot = {
+            state: 'recording',
+            durationMs: 1_000,
+            recording: null,
+            error: null,
+            audioLevel: 0.42,
+        };
+
+        recorderMock.audioLevel = 0.42;
+
+        render(
+            <JamItAudioRecorder
+                showAudioLevel={false}
+            />,
+        );
+
+        expect(
+            screen.queryByRole('meter', {
+                name: 'Audio input level',
+            }),
+        ).toBeNull();
+    });
+
+    it('shows a zero audio level while paused', () => {
+        recorderMock.snapshot = {
+            state: 'paused',
+            durationMs: 1_000,
+            recording: null,
+            error: null,
+            audioLevel: 0,
+        };
+
+        recorderMock.audioLevel = 0;
+
+        render(<JamItAudioRecorder />);
+
+        const meter = screen.getByRole('meter', {
+            name: 'Audio input level',
+        });
+
+        expect(meter.getAttribute('aria-valuenow')).toBe('0');
+
+        const levelValue = meter.querySelector(
+            '.jamit-audio-recorder__audio-level-value',
+        );
+
+        if (levelValue === null) {
+            throw new Error('Audio level value was not rendered.');
+        }
+
+        expect(
+            (levelValue as HTMLElement).style.transform,
+        ).toBe('scaleX(0)');
+    });
+
+    it('provides the current audio level to the custom renderer', () => {
+        recorderMock.snapshot = {
+            state: 'recording',
+            durationMs: 1_000,
+            recording: null,
+            error: null,
+            audioLevel: 0.42,
+        };
+
+        recorderMock.audioLevel = 0.42;
+
+        render(
+            <JamItAudioRecorder
+                renderAudioLevel={({ audioLevel }) => (
+                    <div data-testid="custom-audio-level">
+                        {audioLevel}
+                    </div>
+                )}
+            />,
+        );
+
+        expect(
+            screen.getByTestId('custom-audio-level').textContent,
+        ).toBe('0.42');
+
+        expect(
+            screen.queryByRole('meter', {
+                name: 'Audio input level',
+            }),
+        ).toBeNull();
     });
 });
