@@ -14,6 +14,7 @@ type RecorderSnapshotUpdate = Partial<{
     durationMs: number;
     recording: AudioRecording | null;
     error: AudioRecorderError | null;
+    audioLevel: number;
 }>;
 
 export type RecorderStore = {
@@ -34,6 +35,7 @@ const INITIAL_SNAPSHOT: RecorderSnapshot = Object.freeze({
     durationMs: 0,
     recording: null,
     error: null,
+    audioLevel: 0,
 });
 
 export function createRecorderStore(): RecorderStore {

@@ -11,6 +11,7 @@ describe('createAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -62,6 +63,7 @@ describe('createAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -151,6 +153,7 @@ describe('createAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -636,6 +639,7 @@ describe('createAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -802,6 +806,7 @@ describe('createAudioRecorder', () => {
             expect(recorder.getSnapshot()).toMatchObject({
                 state: 'error',
                 recording: null,
+                audioLevel: 0,
                 error: {
                     code: 'max-duration-exceeded',
                 },
@@ -873,6 +878,7 @@ describe('createAudioRecorder', () => {
             error: {
                 code: 'max-file-size-exceeded',
             },
+            audioLevel: 0,
         });
     });
 
@@ -1334,6 +1340,7 @@ describe('createAudioRecorder', () => {
                 durationMs: 0,
                 recording: null,
                 error: null,
+                audioLevel: 0,
             });
         } finally {
             recorder.destroy();
@@ -1459,6 +1466,7 @@ describe('createAudioRecorder', () => {
             state: 'recording',
             recording: null,
             error: null,
+            audioLevel: 0,
         });
 
         recorder.destroy();
@@ -1487,6 +1495,7 @@ describe('createAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -1624,5 +1633,696 @@ describe('createAudioRecorder', () => {
         });
 
         recorder.destroy();
+    });
+
+    it('updates the audio level while recording', async () => {
+        const animationFrameCallbacks: FrameRequestCallback[] = [];
+
+        const sourceConnect = vi.fn();
+        const sourceDisconnect = vi.fn();
+        const analyserDisconnect = vi.fn();
+        const closeAudioContext = vi.fn().mockResolvedValue(undefined);
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        const analyserNode = {
+            fftSize: 2_048,
+
+            getByteTimeDomainData(
+                samples: Uint8Array<ArrayBuffer>,
+            ): void {
+                for (let index = 0; index < samples.length; index++) {
+                    samples[index] = index % 2 === 0 ? 0 : 255;
+                }
+            },
+
+            disconnect: analyserDisconnect,
+        } as unknown as AnalyserNode;
+
+        const sourceNode = {
+            connect: sourceConnect,
+            disconnect: sourceDisconnect,
+        } as unknown as MediaStreamAudioSourceNode;
+
+        class AudioContextMock {
+            state: AudioContextState = 'running';
+
+            createMediaStreamSource(): MediaStreamAudioSourceNode {
+                return sourceNode;
+            }
+
+            createAnalyser(): AnalyserNode {
+                return analyserNode;
+            }
+
+            close = closeAudioContext;
+
+            resume(): Promise<void> {
+                return Promise.resolve();
+            }
+        }
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+            }
+        }
+
+        const requestAnimationFrame = vi.fn(
+            (callback: FrameRequestCallback): number => {
+                animationFrameCallbacks.push(callback);
+
+                return animationFrameCallbacks.length;
+            },
+        );
+
+        const cancelAnimationFrame = vi.fn();
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+
+                AudioContext:
+                    AudioContextMock as unknown as typeof AudioContext,
+
+                requestAnimationFrame,
+                cancelAnimationFrame,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            expect(sourceConnect).toHaveBeenCalledWith(
+                analyserNode,
+            );
+
+            expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
+
+            animationFrameCallbacks[0]?.(0);
+
+            expect(
+                recorder.getSnapshot().audioLevel,
+            ).toBeGreaterThan(0);
+
+            expect(
+                recorder.getSnapshot().audioLevel,
+            ).toBeLessThanOrEqual(1);
+        } finally {
+            recorder.destroy();
+        }
+    });
+
+    it('stops audio level monitoring while paused', async () => {
+        const animationFrameCallbacks: FrameRequestCallback[] = [];
+
+        const sourceDisconnect = vi.fn();
+        const analyserDisconnect = vi.fn();
+        const closeAudioContext = vi.fn().mockResolvedValue(undefined);
+        const cancelAnimationFrame = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        const analyserNode = {
+            fftSize: 2_048,
+
+            getByteTimeDomainData(
+                samples: Uint8Array<ArrayBuffer>,
+            ): void {
+                for (let index = 0; index < samples.length; index++) {
+                    samples[index] = index % 2 === 0 ? 0 : 255;
+                }
+            },
+
+            disconnect: analyserDisconnect,
+        } as unknown as AnalyserNode;
+
+        const sourceNode = {
+            connect: vi.fn(),
+            disconnect: sourceDisconnect,
+        } as unknown as MediaStreamAudioSourceNode;
+
+        class AudioContextMock {
+            state: AudioContextState = 'running';
+
+            createMediaStreamSource(): MediaStreamAudioSourceNode {
+                return sourceNode;
+            }
+
+            createAnalyser(): AnalyserNode {
+                return analyserNode;
+            }
+
+            close = closeAudioContext;
+
+            resume(): Promise<void> {
+                return Promise.resolve();
+            }
+        }
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            pause(): void {
+                this.state = 'paused';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+            }
+        }
+
+        const requestAnimationFrame = vi.fn(
+            (callback: FrameRequestCallback): number => {
+                animationFrameCallbacks.push(callback);
+
+                return animationFrameCallbacks.length;
+            },
+        );
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+
+                AudioContext:
+                    AudioContextMock as unknown as typeof AudioContext,
+
+                requestAnimationFrame,
+                cancelAnimationFrame,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            animationFrameCallbacks[0]?.(0);
+
+            expect(
+                recorder.getSnapshot().audioLevel,
+            ).toBeGreaterThan(0);
+
+            recorder.pause();
+
+            expect(recorder.getSnapshot().state).toBe('paused');
+
+            expect(recorder.getSnapshot().audioLevel).toBe(0);
+
+            expect(cancelAnimationFrame).toHaveBeenCalledTimes(1);
+
+            expect(sourceDisconnect).toHaveBeenCalledTimes(1);
+
+            expect(analyserDisconnect).toHaveBeenCalledTimes(1);
+
+            expect(closeAudioContext).toHaveBeenCalledTimes(1);
+        } finally {
+            recorder.destroy();
+        }
+    });
+
+    it('restarts audio level monitoring after resume', async () => {
+        const animationFrameCallbacks: FrameRequestCallback[] = [];
+
+        const createMediaStreamSource = vi.fn();
+        const createAnalyser = vi.fn();
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        const sourceNode = {
+            connect: vi.fn(),
+            disconnect: vi.fn(),
+        } as unknown as MediaStreamAudioSourceNode;
+
+        const analyserNode = {
+            fftSize: 2_048,
+
+            getByteTimeDomainData(
+                samples: Uint8Array<ArrayBuffer>,
+            ): void {
+                samples.fill(128);
+            },
+
+            disconnect: vi.fn(),
+        } as unknown as AnalyserNode;
+
+        createMediaStreamSource.mockReturnValue(sourceNode);
+        createAnalyser.mockReturnValue(analyserNode);
+
+        class AudioContextMock {
+            state: AudioContextState = 'running';
+
+            createMediaStreamSource = createMediaStreamSource;
+            createAnalyser = createAnalyser;
+
+            close(): Promise<void> {
+                return Promise.resolve();
+            }
+
+            resume(): Promise<void> {
+                return Promise.resolve();
+            }
+        }
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            pause(): void {
+                this.state = 'paused';
+            }
+
+            resume(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+            }
+        }
+
+        const requestAnimationFrame = vi.fn(
+            (callback: FrameRequestCallback): number => {
+                animationFrameCallbacks.push(callback);
+
+                return animationFrameCallbacks.length;
+            },
+        );
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+
+                AudioContext:
+                    AudioContextMock as unknown as typeof AudioContext,
+
+                requestAnimationFrame,
+                cancelAnimationFrame: vi.fn(),
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            expect(createMediaStreamSource).toHaveBeenCalledTimes(1);
+            expect(createAnalyser).toHaveBeenCalledTimes(1);
+            expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
+
+            recorder.pause();
+            recorder.resume();
+
+            expect(recorder.getSnapshot().state).toBe('recording');
+
+            expect(createMediaStreamSource).toHaveBeenCalledTimes(2);
+            expect(createAnalyser).toHaveBeenCalledTimes(2);
+            expect(requestAnimationFrame).toHaveBeenCalledTimes(2);
+        } finally {
+            recorder.destroy();
+        }
+    });
+
+    it('stops audio level monitoring when recording stops', async () => {
+        const animationFrameCallbacks: FrameRequestCallback[] = [];
+
+        const cancelAnimationFrame = vi.fn();
+        const sourceDisconnect = vi.fn();
+        const analyserDisconnect = vi.fn();
+        const closeAudioContext = vi.fn().mockResolvedValue(undefined);
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        const sourceNode = {
+            connect: vi.fn(),
+            disconnect: sourceDisconnect,
+        } as unknown as MediaStreamAudioSourceNode;
+
+        const analyserNode = {
+            fftSize: 2_048,
+
+            getByteTimeDomainData(
+                samples: Uint8Array<ArrayBuffer>,
+            ): void {
+                for (let index = 0; index < samples.length; index++) {
+                    samples[index] = index % 2 === 0 ? 0 : 255;
+                }
+            },
+
+            disconnect: analyserDisconnect,
+        } as unknown as AnalyserNode;
+
+        class AudioContextMock {
+            state: AudioContextState = 'running';
+
+            createMediaStreamSource(): MediaStreamAudioSourceNode {
+                return sourceNode;
+            }
+
+            createAnalyser(): AnalyserNode {
+                return analyserNode;
+            }
+
+            close = closeAudioContext;
+
+            resume(): Promise<void> {
+                return Promise.resolve();
+            }
+        }
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+            mimeType = 'audio/webm';
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+
+                this.ondataavailable?.({
+                    data: new Blob(['audio-data']),
+                } as BlobEvent);
+
+                this.onstop?.();
+            }
+        }
+
+        const requestAnimationFrame = vi.fn(
+            (callback: FrameRequestCallback): number => {
+                animationFrameCallbacks.push(callback);
+
+                return animationFrameCallbacks.length;
+            },
+        );
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+
+                AudioContext:
+                    AudioContextMock as unknown as typeof AudioContext,
+
+                requestAnimationFrame,
+                cancelAnimationFrame,
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            animationFrameCallbacks[0]?.(0);
+
+            expect(
+                recorder.getSnapshot().audioLevel,
+            ).toBeGreaterThan(0);
+
+            const stopPromise = recorder.stop();
+
+            expect(recorder.getSnapshot().audioLevel).toBe(0);
+
+            expect(cancelAnimationFrame).toHaveBeenCalledTimes(1);
+            expect(sourceDisconnect).toHaveBeenCalledTimes(1);
+            expect(analyserDisconnect).toHaveBeenCalledTimes(1);
+            expect(closeAudioContext).toHaveBeenCalledTimes(1);
+
+            await expect(stopPromise).resolves.toMatchObject({
+                mimeType: 'audio/webm',
+            });
+        } finally {
+            recorder.destroy();
+        }
+    });
+
+    it('continues recording when audio level monitoring fails', async () => {
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        class AudioContextMock {
+            constructor() {
+                throw new Error('AudioContext failed');
+            }
+        }
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+            }
+        }
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+
+                AudioContext:
+                    AudioContextMock as unknown as typeof AudioContext,
+
+                requestAnimationFrame: vi.fn(() => 1),
+                cancelAnimationFrame: vi.fn(),
+            },
+        });
+
+        try {
+            await expect(
+                recorder.start(),
+            ).resolves.toBeUndefined();
+
+            expect(recorder.getSnapshot()).toMatchObject({
+                state: 'recording',
+                audioLevel: 0,
+                error: null,
+            });
+        } finally {
+            recorder.destroy();
+        }
+    });
+
+    it('clamps the audio level to one', async () => {
+        const animationFrameCallbacks: FrameRequestCallback[] = [];
+
+        const mediaStream = {
+            getTracks: () => [],
+        } as unknown as MediaStream;
+
+        const analyserNode = {
+            fftSize: 2_048,
+
+            getByteTimeDomainData(
+                samples: Uint8Array<ArrayBuffer>,
+            ): void {
+                samples.fill(255);
+            },
+
+            disconnect(): void {},
+        } as unknown as AnalyserNode;
+
+        const sourceNode = {
+            connect(): void {},
+            disconnect(): void {},
+        } as unknown as MediaStreamAudioSourceNode;
+
+        class AudioContextMock {
+            state: AudioContextState = 'running';
+
+            createMediaStreamSource(): MediaStreamAudioSourceNode {
+                return sourceNode;
+            }
+
+            createAnalyser(): AnalyserNode {
+                return analyserNode;
+            }
+
+            close(): Promise<void> {
+                return Promise.resolve();
+            }
+
+            resume(): Promise<void> {
+                return Promise.resolve();
+            }
+        }
+
+        class MediaRecorderMock {
+            static isTypeSupported(): boolean {
+                return true;
+            }
+
+            state: RecordingState = 'inactive';
+
+            ondataavailable: ((event: BlobEvent) => void) | null =
+                null;
+
+            onstop: (() => void) | null = null;
+            onerror: ((event: Event) => void) | null = null;
+
+            start(): void {
+                this.state = 'recording';
+            }
+
+            stop(): void {
+                this.state = 'inactive';
+            }
+        }
+
+        const requestAnimationFrame = vi.fn(
+            (callback: FrameRequestCallback): number => {
+                animationFrameCallbacks.push(callback);
+
+                return animationFrameCallbacks.length;
+            },
+        );
+
+        const recorder = createAudioRecorder({
+            environment: {
+                navigator: {
+                    mediaDevices: {
+                        getUserMedia: vi.fn().mockResolvedValue(
+                            mediaStream,
+                        ),
+                    } as unknown as MediaDevices,
+                },
+
+                MediaRecorder:
+                    MediaRecorderMock as unknown as typeof MediaRecorder,
+
+                AudioContext:
+                    AudioContextMock as unknown as typeof AudioContext,
+
+                requestAnimationFrame,
+                cancelAnimationFrame: vi.fn(),
+            },
+        });
+
+        try {
+            await recorder.start();
+
+            for (let index = 0; index < 20; index++) {
+                animationFrameCallbacks[index]?.(index);
+            }
+
+            expect(recorder.getSnapshot().audioLevel).toBeGreaterThan(0.99);
+            expect(recorder.getSnapshot().audioLevel).toBeLessThanOrEqual(1);
+        } finally {
+            recorder.destroy();
+        }
     });
 });

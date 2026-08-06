@@ -11,6 +11,7 @@ describe('createRecorderStore', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -51,6 +52,7 @@ describe('createRecorderStore', () => {
             durationMs: 1_500,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -100,5 +102,11 @@ describe('createRecorderStore', () => {
             store.destroy();
             store.destroy();
         }).not.toThrow();
+    });
+
+    it('starts with an audio level of zero', () => {
+        const store = createRecorderStore();
+
+        expect(store.getSnapshot().audioLevel).toBe(0);
     });
 });
