@@ -30,11 +30,21 @@ export function getDefaultBrowserEnvironment(): AudioRecorderBrowserEnvironment 
 
         ...(typeof requestAnimationFrame === 'undefined'
             ? {}
-            : { requestAnimationFrame }),
+            : {
+                requestAnimationFrame: (
+                    callback: FrameRequestCallback,
+                ): number =>
+                    globalThis.requestAnimationFrame(callback),
+            }),
 
         ...(typeof cancelAnimationFrame === 'undefined'
             ? {}
-            : { cancelAnimationFrame }),
+            : {
+                cancelAnimationFrame: (
+                    handle: number,
+                ): void =>
+                    globalThis.cancelAnimationFrame(handle),
+            }),
     };
 }
 
