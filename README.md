@@ -2,6 +2,12 @@
 
 A modern, framework-friendly audio recording library for Vanilla TypeScript, Vue, Nuxt and React.
 
+## Live demo
+
+Test the JamIT Audio Recorder directly in your browser. Try recording, pausing, resuming, playback, downloading, and the ready-to-use recorder interface.
+
+[Open the interactive live demo](https://jamit.one/packages/jamit-audio-recorder)
+
 ## Packages
 
 - `@codeplayer71/audio-recorder-core`
