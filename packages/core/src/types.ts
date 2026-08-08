@@ -44,4 +44,5 @@ export type RecorderSnapshot = Readonly<{
     durationMs: number;
     recording: AudioRecording | null;
     error: AudioRecorderError | null;
+    audioLevel: number;
 }>;

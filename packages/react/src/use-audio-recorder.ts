@@ -17,6 +17,7 @@ export type UseAudioRecorderOptions = Parameters<
 
 export type UseAudioRecorderReturn = {
     snapshot: RecorderSnapshot;
+    audioLevel: number;
     start: CoreRecorder['start'];
     pause: CoreRecorder['pause'];
     resume: CoreRecorder['resume'];
@@ -77,6 +78,7 @@ export function useAudioRecorder(
 
     return {
         snapshot,
+        audioLevel: snapshot.audioLevel,
         start: recorder.start,
         pause: recorder.pause,
         resume: recorder.resume,

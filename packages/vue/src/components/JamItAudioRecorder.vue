@@ -23,6 +23,7 @@ export type JamItAudioRecorderProps = {
   showTitle?: boolean;
   showStatus?: boolean;
   showDuration?: boolean;
+  showAudioLevel?: boolean;
   showPlayer?: boolean;
   showDownload?: boolean;
   showCancel?: boolean;
@@ -53,6 +54,7 @@ const props = withDefaults(
       showTitle: true,
       showStatus: true,
       showDuration: true,
+      showAudioLevel: true,
       showPlayer: true,
       showDownload: true,
       showCancel: true,
@@ -62,6 +64,7 @@ const props = withDefaults(
 
 const {
   snapshot,
+  audioLevel,
   start,
   pause,
   resume,
@@ -86,6 +89,9 @@ const isIdle = computed(() => snapshot.value.state === 'idle');
 const isRecording = computed(() => snapshot.value.state === 'recording');
 const isPaused = computed(() => snapshot.value.state === 'paused');
 const isActive = computed(() => isRecording.value || isPaused.value);
+const isAudioLevelVisible = computed(
+    () => props.showAudioLevel && isActive.value,
+);
 
 const canReset = computed(
     () =>
@@ -152,6 +158,31 @@ const canDownload = computed(
         </p>
       </slot>
     </div>
+
+    <slot
+        name="audioLevel"
+        :audio-level="audioLevel"
+        :snapshot="snapshot"
+        :is-recording="isRecording"
+        :is-paused="isPaused"
+    >
+      <div
+          v-if="isAudioLevelVisible"
+          class="jamit-audio-recorder__audio-level"
+          role="meter"
+          aria-label="Audio input level"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          :aria-valuenow="Math.round(audioLevel * 100)"
+      >
+        <div
+            class="jamit-audio-recorder__audio-level-value"
+            :style="{
+          transform: `scaleX(${audioLevel})`,
+        }"
+        />
+      </div>
+    </slot>
 
     <slot
         name="controls"
@@ -402,6 +433,11 @@ const canDownload = computed(
   --jamit-recorder-button-radius: 8px;
   --jamit-recorder-spacing: 24px;
   --jamit-recorder-icon-size: 18px;
+  --jamit-recorder-audio-level-background:
+      var(--jamit-recorder-border-color);
+  --jamit-recorder-audio-level-color:
+      var(--jamit-recorder-primary);
+  --jamit-recorder-audio-level-height: 0.5rem;
 
   container-type: inline-size;
   width: min(100%, 720px);
@@ -427,6 +463,36 @@ const canDownload = computed(
   display: flex;
   flex-wrap: wrap;
   gap: 12px 24px;
+}
+
+.jamit-audio-recorder__audio-level {
+  width: 100%;
+  height: var(--jamit-recorder-audio-level-height);
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(
+      --jamit-recorder-audio-level-background,
+      var(--jamit-recorder-border-color)
+  );
+}
+
+.jamit-audio-recorder__audio-level-value {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(
+      --jamit-recorder-audio-level-color,
+      var(--jamit-recorder-primary)
+  );
+  transition: transform 80ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jamit-audio-recorder__audio-level-value {
+    transition: none;
+  }
 }
 
 .jamit-audio-recorder__status,

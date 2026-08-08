@@ -15,6 +15,11 @@
     --jamit-recorder-button-radius: 8px;
     --jamit-recorder-spacing: 24px;
     --jamit-recorder-icon-size: 18px;
+    --jamit-recorder-audio-level-background:
+            var(--jamit-recorder-border-color);
+    --jamit-recorder-audio-level-color:
+            var(--jamit-recorder-primary);
+    --jamit-recorder-audio-level-height: 0.5rem;
 
     container-type: inline-size;
     width: min(100%, 720px);
@@ -40,6 +45,36 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px 24px;
+}
+
+.jamit-audio-recorder__audio-level {
+    width: 100%;
+    height: var(--jamit-recorder-audio-level-height);
+    margin-top: 16px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(
+            --jamit-recorder-audio-level-background,
+            var(--jamit-recorder-border-color)
+    );
+}
+
+.jamit-audio-recorder__audio-level-value {
+    width: 100%;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: var(
+            --jamit-recorder-audio-level-color,
+            var(--jamit-recorder-primary)
+    );
+    transition: transform 80ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jamit-audio-recorder__audio-level-value {
+        transition: none;
+    }
 }
 
 .jamit-audio-recorder__status,

@@ -30,6 +30,12 @@ import type {
 const DURATION_UPDATE_INTERVAL_MS = 100;
 const AUDIO_CHUNK_INTERVAL_MS = 1_000;
 
+const AUDIO_LEVEL_FFT_SIZE = 2_048;
+const AUDIO_LEVEL_SENSITIVITY = 3.5;
+const AUDIO_LEVEL_SMOOTHING_FACTOR = 0.3;
+const AUDIO_LEVEL_UPDATE_THRESHOLD = 0.01;
+const AUDIO_LEVEL_SILENCE_THRESHOLD = 0.005;
+
 export type AudioRecorder = {
     getSnapshot: () => RecorderSnapshot;
     subscribe: (
@@ -77,6 +83,13 @@ export function createAudioRecorder(
     let maxDurationTimer: ReturnType<typeof setTimeout> | null = null;
     let maxDurationExceeded = false;
     let isDestroyed = false;
+    let audioContext: AudioContext | null = null;
+    let audioSourceNode: MediaStreamAudioSourceNode | null = null;
+    let analyserNode: AnalyserNode | null = null;
+
+    let audioLevelBuffer: Uint8Array<ArrayBuffer> | null = null;
+    let audioLevelAnimationFrameId: number | null = null;
+    let smoothedAudioLevel = 0;
 
     function assertNotDestroyed(): void {
         if (isDestroyed) {
@@ -112,6 +125,155 @@ export function createAudioRecorder(
         }
     }
 
+    function calculateAudioLevel(
+        samples: Uint8Array<ArrayBuffer>,
+    ): number {
+        let sum = 0;
+
+        for (const sample of samples) {
+            const normalizedSample = (sample - 128) / 128;
+
+            sum += normalizedSample * normalizedSample;
+        }
+
+        const rms = Math.sqrt(sum / samples.length);
+
+        return Math.min(
+            1,
+            Math.max(0, rms * AUDIO_LEVEL_SENSITIVITY),
+        );
+    }
+
+    function monitorAudioLevel(): void {
+        if (
+            analyserNode === null ||
+            audioLevelBuffer === null
+        ) {
+            return;
+        }
+
+        analyserNode.getByteTimeDomainData(audioLevelBuffer);
+
+        const currentLevel =
+            calculateAudioLevel(audioLevelBuffer);
+
+        smoothedAudioLevel =
+            smoothedAudioLevel *
+            (1 - AUDIO_LEVEL_SMOOTHING_FACTOR) +
+            currentLevel * AUDIO_LEVEL_SMOOTHING_FACTOR;
+
+        const nextLevel =
+            smoothedAudioLevel < AUDIO_LEVEL_SILENCE_THRESHOLD
+                ? 0
+                : Math.min(1, Math.max(0, smoothedAudioLevel));
+
+        const previousLevel =
+            store.getSnapshot().audioLevel;
+
+        if (
+            Math.abs(previousLevel - nextLevel) >=
+            AUDIO_LEVEL_UPDATE_THRESHOLD ||
+            (nextLevel === 0 && previousLevel !== 0)
+        ) {
+            store.update({
+                audioLevel: nextLevel,
+            });
+        }
+
+        const requestAnimationFrame =
+            browserEnvironment.requestAnimationFrame;
+
+        if (requestAnimationFrame === undefined) {
+            return;
+        }
+
+        audioLevelAnimationFrameId =
+            requestAnimationFrame(monitorAudioLevel);
+    }
+
+    function stopAudioLevelMonitoring(): void {
+        if (audioLevelAnimationFrameId !== null) {
+            browserEnvironment.cancelAnimationFrame?.(
+                audioLevelAnimationFrameId,
+            );
+
+            audioLevelAnimationFrameId = null;
+        }
+
+        try {
+            audioSourceNode?.disconnect();
+        } catch {
+            // Cleanup continues if the source node is already disconnected.
+        }
+
+        try {
+            analyserNode?.disconnect();
+        } catch {
+            // Cleanup continues if the analyser node is already disconnected.
+        }
+
+        if (audioContext !== null) {
+            void audioContext.close().catch(() => undefined);
+        }
+
+        audioSourceNode = null;
+        analyserNode = null;
+        audioContext = null;
+
+        // NEW
+        audioLevelBuffer = null;
+        smoothedAudioLevel = 0;
+
+        store.update({
+            audioLevel: 0,
+        });
+    }
+
+    function startAudioLevelMonitoring(
+        stream: MediaStream,
+    ): void {
+        stopAudioLevelMonitoring();
+
+        const AudioContextConstructor =
+            browserEnvironment.AudioContext;
+
+        const requestAnimationFrame =
+            browserEnvironment.requestAnimationFrame;
+
+        if (
+            AudioContextConstructor === undefined ||
+            requestAnimationFrame === undefined
+        ) {
+            return;
+        }
+
+        try {
+            audioContext = new AudioContextConstructor();
+
+            audioSourceNode =
+                audioContext.createMediaStreamSource(stream);
+
+            analyserNode = audioContext.createAnalyser();
+
+            analyserNode.fftSize = AUDIO_LEVEL_FFT_SIZE;
+
+            audioLevelBuffer = new Uint8Array(
+                analyserNode.fftSize,
+            );
+
+            audioSourceNode.connect(analyserNode);
+
+            if (audioContext.state === 'suspended') {
+                void audioContext.resume().catch(() => undefined);
+            }
+
+            audioLevelAnimationFrameId =
+                requestAnimationFrame(monitorAudioLevel);
+        } catch {
+            stopAudioLevelMonitoring();
+        }
+    }
+
     function stopMediaTracks(): void {
         for (const track of mediaStream?.getTracks() ?? []) {
             track.stop();
@@ -138,6 +300,7 @@ export function createAudioRecorder(
     }
 
     function cleanupStoppedRecording(): void {
+        stopAudioLevelMonitoring();
         stopMediaTracks();
         resetRecordingData();
     }
@@ -262,7 +425,11 @@ export function createAudioRecorder(
         pauseDurationTimer();
         clearMaxDurationTimer();
 
-        store.transition('processing');
+        stopAudioLevelMonitoring();
+
+        store.transition('processing', {
+            audioLevel: 0,
+        });
 
         return new Promise<AudioRecording>(
             (resolve, reject) => {
@@ -532,8 +699,10 @@ export function createAudioRecorder(
                     durationMs: 0,
                     recording: null,
                     error: null,
+                    audioLevel: 0,
                 });
 
+                startAudioLevelMonitoring(mediaStream);
                 startDurationTimer();
                 startMaxDurationTimer();
             } catch (originalError) {
@@ -566,6 +735,7 @@ export function createAudioRecorder(
 
             try {
                 mediaRecorder.pause();
+                stopAudioLevelMonitoring();
                 pauseDurationTimer();
                 clearMaxDurationTimer();
                 store.transition('paused');
@@ -599,6 +769,9 @@ export function createAudioRecorder(
 
             try {
                 mediaRecorder.resume();
+                if (mediaStream !== null) {
+                    startAudioLevelMonitoring(mediaStream);
+                }
                 store.transition('recording');
                 startDurationTimer();
                 startMaxDurationTimer();

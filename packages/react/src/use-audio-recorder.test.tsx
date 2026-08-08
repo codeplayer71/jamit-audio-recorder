@@ -28,6 +28,7 @@ describe('useAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         } satisfies RecorderSnapshot);
 
         recorderMock.subscribe.mockImplementation(() => {
@@ -43,6 +44,7 @@ describe('useAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
@@ -77,6 +79,7 @@ describe('useAudioRecorder', () => {
             durationMs: 0,
             recording: null,
             error: null,
+            audioLevel: 0,
         };
 
         recorderMock.getSnapshot.mockImplementation(() => currentSnapshot);
@@ -97,6 +100,7 @@ describe('useAudioRecorder', () => {
                 durationMs: 1_500,
                 recording: null,
                 error: null,
+                audioLevel: 0,
             };
 
             listener?.();
@@ -107,6 +111,7 @@ describe('useAudioRecorder', () => {
             durationMs: 1_500,
             recording: null,
             error: null,
+            audioLevel: 0,
         });
     });
 
