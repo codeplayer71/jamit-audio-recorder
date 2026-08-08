@@ -17,6 +17,7 @@ export type UseAudioRecorderOptions = Parameters<
 
 export type UseAudioRecorderReturn = {
     snapshot: ComputedRef<RecorderSnapshot>;
+    audioLevel: ComputedRef<number>;
     start: CoreRecorder['start'];
     pause: CoreRecorder['pause'];
     resume: CoreRecorder['resume'];
@@ -40,6 +41,10 @@ export function useAudioRecorder(
 
     const snapshot = computed(() => currentSnapshot.value);
 
+    const audioLevel = computed(
+        () => currentSnapshot.value.audioLevel,
+    );
+
     let isDestroyed = false;
 
     function destroy(): void {
@@ -59,6 +64,7 @@ export function useAudioRecorder(
 
     return {
         snapshot,
+        audioLevel,
         start: () => recorder.start(),
         pause: () => recorder.pause(),
         resume: () => recorder.resume(),

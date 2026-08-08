@@ -4,7 +4,7 @@ A modern, framework-friendly audio recording library for Vanilla TypeScript, Vue
 
 ## Live demo
 
-Test the JamIT Audio Recorder directly in your browser. Try recording, pausing, resuming, playback, downloading, and the ready-to-use recorder interface.
+Test the JamIT Audio Recorder directly in your browser. Try recording, pausing, resuming, live audio level monitoring, playback, downloading, and the ready-to-use recorder interface.
 
 [Open the interactive live demo](https://jamit.one/packages/jamit-audio-recorder)
 
@@ -23,6 +23,7 @@ Test the JamIT Audio Recorder directly in your browser. Try recording, pausing, 
 - Ready-to-use Vue and React recorder components
 - Nuxt module with automatic imports and component registration
 - Maximum duration and file-size limits
+- Live audio level monitoring during recording
 - Browser-aware MIME-type detection
 - Playback and download support
 - Customizable styles through CSS variables
@@ -31,9 +32,9 @@ Test the JamIT Audio Recorder directly in your browser. Try recording, pausing, 
 
 ## Project status
 
-The recording core, framework integrations, ready-to-use components and example applications are functional.
+JamIT Audio Recorder is publicly available on npm and actively developed.
 
-The project is currently being prepared for its first public release. Package metadata, documentation, browser validation and publishing workflows are still being finalized.
+The recording core, framework integrations, ready-to-use components and example applications are functional. New backwards-compatible features are released through the monorepo's Changesets-based release workflow.
 
 ## Installation
 
@@ -63,8 +64,6 @@ pnpm add @codeplayer71/audio-recorder-react
 pnpm add @codeplayer71/audio-recorder-nuxt
 ```
 
-> The packages are not publicly available yet. These installation commands will work after the first public release.
-
 ## Core
 
 The framework-independent core can be used directly in any browser application.
@@ -86,6 +85,7 @@ const recorder = createAudioRecorder({
 const unsubscribe = recorder.subscribe((snapshot) => {
   console.log(snapshot.state);
   console.log(snapshot.durationMs);
+  console.log(snapshot.audioLevel);
   console.log(snapshot.recording);
   console.log(snapshot.error);
 });
@@ -104,6 +104,10 @@ unsubscribe();
 recorder.destroy();
 ```
 
+The `audioLevel` value is normalized to the range `0` to `1`.
+
+It is updated while recording and returns to `0` when recording is paused, stopped, cancelled, reset or destroyed.
+
 ## Vue
 
 ### Ready-to-use component
@@ -121,6 +125,14 @@ import '@codeplayer71/audio-recorder-vue/style.css';
 </template>
 ```
 
+The built-in component includes a live audio level indicator while recording.
+
+You can disable it with:
+
+```vue
+<JamItAudioRecorder :show-audio-level="false" />
+```
+
 ### Headless composable
 
 Use the composable when you want to build a completely custom interface:
@@ -131,6 +143,7 @@ import { useAudioRecorder } from '@codeplayer71/audio-recorder-vue';
 
 const {
   snapshot,
+  audioLevel,
   start,
   pause,
   resume,
@@ -147,6 +160,11 @@ const {
   <div>
     <p>Status: {{ snapshot.state }}</p>
     <p>Duration: {{ snapshot.durationMs }} ms</p>
+
+    <progress
+      :value="audioLevel"
+      max="1"
+    />
 
     <button
       type="button"
@@ -210,6 +228,14 @@ export function Recorder() {
 }
 ```
 
+The built-in component includes a live audio level indicator while recording.
+
+You can disable it with:
+
+```tsx
+<JamItAudioRecorder showAudioLevel={false} />
+```
+
 ### Headless hook
 
 Use the hook when you want full control over the interface:
@@ -222,6 +248,7 @@ import {
 export function Recorder() {
   const {
     snapshot,
+    audioLevel,
     start,
     pause,
     resume,
@@ -237,6 +264,11 @@ export function Recorder() {
     <div>
       <p>Status: {snapshot.state}</p>
       <p>Duration: {snapshot.durationMs} ms</p>
+
+      <progress
+        value={audioLevel}
+        max={1}
+      />
 
       <button
         type="button"
@@ -314,6 +346,7 @@ The composable is also automatically available:
 <script setup lang="ts">
 const {
   snapshot,
+  audioLevel,
   start,
   pause,
   resume,
@@ -322,7 +355,16 @@ const {
   reset,
 } = useAudioRecorder();
 </script>
+
+<template>
+  <progress
+    :value="audioLevel"
+    max="1"
+  />
+</template>
 ```
+
+Nuxt uses the Vue integration internally. It does not implement its own audio level calculation.
 
 ## Component customization
 
@@ -338,6 +380,7 @@ The ready-to-use Vue and React components provide a professional default interfa
   download-label="Save recording"
   :max-duration-ms="60_000"
   :max-file-size-bytes="5_000_000"
+  :show-audio-level="true"
   :show-cancel="false"
 />
 ```
@@ -347,6 +390,7 @@ Available display options include:
 - `showTitle`
 - `showStatus`
 - `showDuration`
+- `showAudioLevel`
 - `showPlayer`
 - `showDownload`
 - `showCancel`
@@ -370,6 +414,10 @@ The default design can be customized without replacing the component structure:
   --jamit-recorder-button-radius: 10px;
   --jamit-recorder-spacing: 28px;
   --jamit-recorder-icon-size: 20px;
+
+  --jamit-recorder-audio-level-background: #334155;
+  --jamit-recorder-audio-level-color: #2dd4bf;
+  --jamit-recorder-audio-level-height: 0.5rem;
 }
 ```
 
@@ -393,6 +441,13 @@ Individual areas of the Vue component can be replaced through named slots.
 <JamItAudioRecorder>
   <template #header>
     <h2>Voice message</h2>
+  </template>
+
+  <template #audioLevel="{ audioLevel }">
+    <progress
+      :value="audioLevel"
+      max="1"
+    />
   </template>
 
   <template
@@ -426,6 +481,7 @@ Available slots:
 - `header`
 - `status`
 - `duration`
+- `audioLevel`
 - `controls`
 - `error`
 - `player`
@@ -440,6 +496,12 @@ Individual areas of the React component can be replaced through render props.
 <JamItAudioRecorder
   renderHeader={() => (
     <h2>Voice message</h2>
+  )}
+  renderAudioLevel={({ audioLevel }) => (
+    <progress
+      value={audioLevel}
+      max={1}
+    />
   )}
   renderControls={({
     start,
@@ -472,6 +534,7 @@ Available render props:
 - `renderHeader`
 - `renderStatus`
 - `renderDuration`
+- `renderAudioLevel`
 - `renderControls`
 - `renderError`
 - `renderPlayer`
@@ -517,15 +580,22 @@ type RecorderSnapshot = {
   durationMs: number;
   recording: AudioRecording | null;
   error: AudioRecorderError | null;
+  audioLevel: number;
 };
 ```
+
+`audioLevel` is a normalized live microphone level between `0` and `1`.
+
+It is intended as lightweight visual feedback for microphone activity and should not be treated as a professional decibel measurement.
 
 The recorder state can include values such as:
 
 ```text
 idle
+requesting-permission
 recording
 paused
+processing
 completed
 error
 ```
@@ -569,6 +639,25 @@ audio/webm
 
 The library detects the actual MIME type and assigns the matching file extension. It does not simply rename the recorded file.
 
+## Live audio level monitoring
+
+Live audio level monitoring is implemented in the framework-independent core with the Web Audio API.
+
+The existing microphone `MediaStream` is reused for both recording and analysis. No second microphone stream is requested.
+
+The level:
+
+- is normalized between `0` and `1`
+- reacts to microphone input while recording
+- is smoothed to reduce visual flicker
+- resets to `0` while paused
+- resets to `0` when recording ends
+- does not connect the microphone to the audio output
+- does not modify the recorded audio
+- does not provide a professional dB measurement
+
+Vue, React and Nuxt consume the same core value and do not calculate their own audio level.
+
 ## Resource cleanup
 
 The library automatically cleans up:
@@ -578,6 +667,10 @@ The library automatically cleans up:
 - object URLs
 - state subscriptions
 - framework lifecycle resources
+- Web Audio API analysis resources
+- animation frames used for audio level monitoring
+
+Audio-level resources such as `AudioContext`, `MediaStreamAudioSourceNode` and `AnalyserNode` are released when monitoring stops.
 
 The Vue integration cleans up when its effect scope is disposed.
 
@@ -612,10 +705,10 @@ pnpm build
 Run an individual example:
 
 ```bash
-pnpm --filter vanilla dev
-pnpm --filter vue dev
-pnpm --filter react dev
-pnpm --filter nuxt dev
+pnpm --filter @codeplayer71/audio-recorder-example-vanilla dev
+pnpm --filter @codeplayer71/audio-recorder-example-vue dev
+pnpm --filter @codeplayer71/audio-recorder-example-react dev
+pnpm --filter @codeplayer71/audio-recorder-example-nuxt dev
 ```
 
 ## Repository

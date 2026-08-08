@@ -9,6 +9,10 @@ export type AudioRecorderBrowserSupport = Readonly<{
 export type AudioRecorderBrowserEnvironment = {
     navigator?: Pick<Navigator, 'mediaDevices'>;
     MediaRecorder?: typeof MediaRecorder;
+
+    AudioContext?: typeof AudioContext;
+    requestAnimationFrame?: typeof requestAnimationFrame;
+    cancelAnimationFrame?: typeof cancelAnimationFrame;
 };
 
 export function getDefaultBrowserEnvironment(): AudioRecorderBrowserEnvironment {
@@ -19,6 +23,28 @@ export function getDefaultBrowserEnvironment(): AudioRecorderBrowserEnvironment 
         ...(typeof MediaRecorder === 'undefined'
             ? {}
             : { MediaRecorder }),
+
+        ...(typeof AudioContext === 'undefined'
+            ? {}
+            : { AudioContext }),
+
+        ...(typeof requestAnimationFrame === 'undefined'
+            ? {}
+            : {
+                requestAnimationFrame: (
+                    callback: FrameRequestCallback,
+                ): number =>
+                    globalThis.requestAnimationFrame(callback),
+            }),
+
+        ...(typeof cancelAnimationFrame === 'undefined'
+            ? {}
+            : {
+                cancelAnimationFrame: (
+                    handle: number,
+                ): void =>
+                    globalThis.cancelAnimationFrame(handle),
+            }),
     };
 }
 
